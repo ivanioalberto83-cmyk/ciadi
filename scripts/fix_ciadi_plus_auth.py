@@ -19,7 +19,7 @@ new_method = '''    private suspend fun fetchProfileFromDatabase(userId: String,
         return try {
             val response = clientFactory.restApi.getPerfis(
                 authHeader = "Bearer $accessToken",
-                select = "id,nome_completo,nome_exibicao,email,tipo,ativo,funcao_at,unidade_nome",
+                select = "id,nome_completo,nome_exibicao,email,tipo,ativo,funcao_at",
                 idFilter = "eq.$userId"
             )
 
@@ -44,7 +44,7 @@ new_method = '''    private suspend fun fetchProfileFromDatabase(userId: String,
                 fullName = p.nomeCompleto ?: p.nomeExibicao ?: fallbackEmail.substringBefore("@"),
                 role = role,
                 specialty = if (p.funcaoAt) "Acompanhante Terapêutico" else null,
-                unitName = p.unidadeNome ?: "CIADI — Centro Integrado",
+                unitName = "CIADI — Centro Integrado",
                 permissions = Permission.defaultPermissionsFor(role)
             )
         } catch (e: IllegalStateException) {
