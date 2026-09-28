@@ -42,7 +42,7 @@ jobs:
             xargs -0 sed -i 's/com\.example/ao.ciadi.ciadi_plus/g'
 
           ! grep -RIn 'com\.aistudio\.ciadiplus\.app' app build.gradle.kts settings.gradle.kts
-          ! grep -RIn 'google-services' app build.gradle.kts settings.gradle.kts
+          ! grep -RIn 'com.google.gms.google-services\|google-services' app build.gradle.kts settings.gradle.kts
           grep -RIn 'package ao\.ciadi\.ciadi_plus' app/src/main/java | head -5
           grep -n 'applicationId = "ao.ciadi.ciadi_plus"' app/build.gradle.kts
 
