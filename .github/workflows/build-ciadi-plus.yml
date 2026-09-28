@@ -57,6 +57,24 @@ jobs:
         with:
           gradle-version: "9.3.1"
 
+      - name: Generate debug keystore when required
+        working-directory: ciadi-plus
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -f debug.keystore ]; then
+            keytool -genkeypair \\
+              -alias androiddebugkey \\
+              -keyalg RSA \\
+              -keysize 2048 \\
+              -validity 10000 \\
+              -keystore debug.keystore \\
+              -storepass android \\
+              -keypass android \\
+              -dname "CN=Android Debug,O=Android,C=US"
+          fi
+          test -s debug.keystore
+
       - name: Build debug APK
         working-directory: ciadi-plus
         run: gradle :app:assembleDebug --stacktrace
