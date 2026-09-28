@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -16,7 +17,34 @@ jobs:
       - name: Prepare CIADI+ source
         run: |
           unzip -q 'ciadi+.zip' -d ciadi-plus
-          find ciadi-plus -maxdepth 3 -type f | head -50
+          test -f ciadi-plus/settings.gradle.kts
+          test -f ciadi-plus/app/build.gradle.kts
+
+      - name: Normalize Android package and build configuration
+        working-directory: ciadi-plus
+        shell: bash
+        run: |
+          set -euo pipefail
+          sed -i 's/namespace = "com\.example"/namespace = "ao.ciadi.ciadi_plus"/' app/build.gradle.kts
+          sed -i 's/applicationId = "com\.aistudio\.ciadiplus\.app"/applicationId = "ao.ciadi.ciadi_plus"/' app/build.gradle.kts
+
+          # CIADI+ uses Supabase directly; Firebase/Google Services are not used.
+          sed -i '/alias(libs\.plugins\.google\.services) apply false/d' build.gradle.kts
+          sed -i '/alias(libs\.plugins\.google\.services)/d' app/build.gradle.kts
+          sed -i '/import com\.google\.gms\.googleservices\.GoogleServicesPlugin\.MissingGoogleServicesStrategy/d' app/build.gradle.kts
+          sed -i '/googleServices {.*}/d' app/build.gradle.kts
+          sed -i '/implementation(platform(libs\.firebase\.bom))/d' app/build.gradle.kts
+          sed -i '/implementation(libs\.firebase\.ai)/d' app/build.gradle.kts
+          sed -i '/implementation(libs\.firebase\.appcheck\.recaptcha)/d' app/build.gradle.kts
+          sed -i '/implementation(libs\.firebase\.appcheck\.debug)/d' app/build.gradle.kts
+
+          find app/src -type f \( -name '*.kt' -o -name '*.xml' \) -print0 |
+            xargs -0 sed -i 's/com\.example/ao.ciadi.ciadi_plus/g'
+
+          ! grep -RIn 'com\.aistudio\.ciadiplus\.app' app build.gradle.kts settings.gradle.kts
+          ! grep -RIn 'google-services' app build.gradle.kts settings.gradle.kts
+          grep -RIn 'package ao\.ciadi\.ciadi_plus' app/src/main/java | head -5
+          grep -n 'applicationId = "ao.ciadi.ciadi_plus"' app/build.gradle.kts
 
       - name: Setup Java
         uses: actions/setup-java@v5
@@ -31,7 +59,13 @@ jobs:
 
       - name: Build debug APK
         working-directory: ciadi-plus
-        run: gradle assembleDebug --stacktrace
+        run: gradle :app:assembleDebug --stacktrace
+
+      - name: Verify APK
+        working-directory: ciadi-plus
+        run: |
+          test -s app/build/outputs/apk/debug/app-debug.apk
+          ls -lh app/build/outputs/apk/debug/app-debug.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
