@@ -9,7 +9,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -22,7 +21,7 @@ jobs:
           test -f ciadi-plus/settings.gradle.kts
           test -f ciadi-plus/app/build.gradle.kts
 
-      - name: Normalize Android package and build configuration
+      - name: Normalize Android package
         working-directory: ciadi-plus
         shell: bash
         run: |
@@ -30,10 +29,8 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           import re
-
           app = Path("app/build.gradle.kts")
           root = Path("build.gradle.kts")
-
           s = app.read_text()
           s = s.replace('namespace = "com.example"', 'namespace = "ao.ciadi.ciadi_plus"')
           s = s.replace('applicationId = "com.aistudio.ciadiplus.app"', 'applicationId = "ao.ciadi.ciadi_plus"')
@@ -45,11 +42,9 @@ jobs:
           s = s.replace('  implementation(libs.firebase.appcheck.debug)\n', '')
           s = re.sub(r'googleServices \{[^\n]*\}\n?', '', s)
           app.write_text(s)
-
           root_s = root.read_text()
           root_s = root_s.replace('  alias(libs.plugins.google.services) apply false\n', '')
           root.write_text(root_s)
-
           for p in Path("app/src").rglob("*"):
               if p.is_file() and p.suffix in {".kt", ".xml"}:
                   try:
@@ -59,101 +54,13 @@ jobs:
                   if "com.example" in t:
                       p.write_text(t.replace("com.example", "ao.ciadi.ciadi_plus"))
           PY
-
           grep -q 'applicationId = "ao.ciadi.ciadi_plus"' app/build.gradle.kts
           grep -q 'namespace = "ao.ciadi.ciadi_plus"' app/build.gradle.kts
-          ! grep -q 'com.aistudio.ciadiplus.app' app/build.gradle.kts
-          ! grep -q 'google-services' app/build.gradle.kts
-          ! grep -q 'google-services' build.gradle.kts
 
       - name: Apply CIADI+ authentication fixes
-        working-directory: ciadi-plus
-        shell: bash
         run: |
           set -euo pipefail
-          python3 - <<'PY'
-          from pathlib import Path
-
-          dto = Path("app/src/main/java/com/example/data/remote/dto/RestDtos.kt")
-          s = dto.read_text()
-          s = s.replace(
-              '@param:Json(name = "funcao_at") val funcaoAt: String? = null,',
-              '@param:Json(name = "funcao_at") val funcaoAt: Boolean = false,'
-          )
-          dto.write_text(s)
-
-          repo = Path("app/src/main/java/com/example/data/repository/SupabaseAuthRepositoryImpl.kt")
-          s = repo.read_text()
-          s = s.replace('val trimmedPass = password.trim()', 'val trimmedPass = password')
-
-          old_start = s.index('    private suspend fun fetchProfileFromDatabase(')
-          old_end = s.index('\n    override suspend fun refreshSession()', old_start)
-          new_method = '''    private suspend fun fetchProfileFromDatabase(userId: String, fallbackEmail: String, accessToken: String): UserProfile? {
-        return try {
-            val response = clientFactory.restApi.getPerfis(
-                authHeader = "Bearer $accessToken",
-                select = "id,nome_completo,nome_exibicao,email,tipo,ativo,funcao_at,unidade_nome",
-                idFilter = "eq.$userId"
-            )
-
-            if (!response.isSuccessful) {
-                Log.w(TAG, "Falha ao carregar perfil: HTTP ${response.code()}")
-                return null
-            }
-
-            val p = response.body()?.firstOrNull() ?: return null
-
-            if (!p.ativo) {
-                throw IllegalStateException(
-                    "O seu acesso ao CIADI+ está inativo. Contacte a administração do CIADI."
-                )
-            }
-
-            val role = if (p.funcaoAt) UserRole.AT else UserRole.fromCode(p.tipo)
-
-            UserProfile(
-                id = p.id,
-                email = p.email ?: fallbackEmail,
-                fullName = p.nomeCompleto ?: p.nomeExibicao ?: fallbackEmail.substringBefore("@"),
-                role = role,
-                specialty = if (p.funcaoAt) "Acompanhante Terapêutico" else null,
-                unitName = p.unidadeNome ?: "CIADI — Centro Integrado",
-                permissions = Permission.defaultPermissionsFor(role)
-            )
-        } catch (e: IllegalStateException) {
-            throw e
-        } catch (e: Exception) {
-            Log.e(TAG, "Erro ao carregar perfil CIADI+ para $userId: ${e.message}", e)
-            null
-        }
-    }
-'''
-          s = s[:old_start] + new_method + s[old_end:]
-
-          marker = '        } catch (e: java.net.UnknownHostException) {'
-          replacement = '''        } catch (e: IllegalStateException) {
-            Log.w(TAG, "Acesso recusado: ${e.message}")
-            return@withContext Result.failure(e)
-        } catch (e: java.net.UnknownHostException) {'''
-          if marker not in s:
-              raise SystemExit("Expected auth exception marker not found")
-          s = s.replace(marker, replacement, 1)
-          repo.write_text(s)
-
-          interceptor = Path("app/src/main/java/com/example/data/remote/interceptor/SupabaseAuthInterceptor.kt")
-          s = interceptor.read_text()
-          s = s.replace(
-              'val isAuthTokenEndpoint = path.contains("auth/v1/token") || path.contains("auth/v1/recover")',
-              'val isAuthEndpoint = path.startsWith("/auth/v1/")'
-          )
-          s = s.replace('if (!isAuthTokenEndpoint) {', 'if (!isAuthEndpoint) {')
-          interceptor.write_text(s)
-          PY
-
-          grep -q 'funcaoAt: Boolean' app/src/main/java/com/example/data/remote/dto/RestDtos.kt
-          grep -q 'val trimmedPass = password' app/src/main/java/com/example/data/repository/SupabaseAuthRepositoryImpl.kt
-          grep -q 'funcaoAt) UserRole.AT' app/src/main/java/com/example/data/repository/SupabaseAuthRepositoryImpl.kt
-          grep -q 'val isAuthEndpoint = path.startsWith("/auth/v1/")' app/src/main/java/com/example/data/remote/interceptor/SupabaseAuthInterceptor.kt
+          python3 scripts/fix_ciadi_plus_auth.py
 
       - name: Setup Java
         uses: actions/setup-java@v5
@@ -166,7 +73,7 @@ jobs:
         with:
           gradle-version: "9.3.1"
 
-      - name: Generate debug keystore when required
+      - name: Generate debug keystore
         working-directory: ciadi-plus
         shell: bash
         run: |
