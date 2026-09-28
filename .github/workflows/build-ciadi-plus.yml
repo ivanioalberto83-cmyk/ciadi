@@ -15,7 +15,7 @@ jobs:
 
       - name: Prepare CIADI+ source
         run: |
-          unzip -q ciadi-plus-source.zip -d ciadi-plus
+          unzip -q 'ciadi+.zip' -d ciadi-plus
           find ciadi-plus -maxdepth 3 -type f | head -50
 
       - name: Setup Java
