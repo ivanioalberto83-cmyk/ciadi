@@ -58,9 +58,10 @@ jobs:
           grep -q 'namespace = "ao.ciadi.ciadi_plus"' app/build.gradle.kts
 
       - name: Apply CIADI+ authentication fixes
+        working-directory: ciadi-plus
         run: |
           set -euo pipefail
-          python3 scripts/fix_ciadi_plus_auth.py
+          python3 ../scripts/fix_ciadi_plus_auth.py
 
       - name: Setup Java
         uses: actions/setup-java@v5
