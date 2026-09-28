@@ -16,6 +16,8 @@ jobs:
 
       - name: Prepare CIADI+ source
         run: |
+          set -euo pipefail
+          rm -rf ciadi-plus
           unzip -q 'ciadi+.zip' -d ciadi-plus
           test -f ciadi-plus/settings.gradle.kts
           test -f ciadi-plus/app/build.gradle.kts
@@ -25,26 +27,44 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          sed -i 's/namespace = "com\.example"/namespace = "ao.ciadi.ciadi_plus"/' app/build.gradle.kts
-          sed -i 's/applicationId = "com\.aistudio\.ciadiplus\.app"/applicationId = "ao.ciadi.ciadi_plus"/' app/build.gradle.kts
+          python3 - <<'PY'
+          from pathlib import Path
 
-          # CIADI+ uses Supabase directly; Firebase/Google Services are not used.
-          sed -i '/alias(libs\.plugins\.google\.services) apply false/d' build.gradle.kts
-          sed -i '/alias(libs\.plugins\.google\.services)/d' app/build.gradle.kts
-          sed -i '/import com\.google\.gms\.googleservices\.GoogleServicesPlugin\.MissingGoogleServicesStrategy/d' app/build.gradle.kts
-          sed -i '/googleServices {.*}/d' app/build.gradle.kts
-          sed -i '/implementation(platform(libs\.firebase\.bom))/d' app/build.gradle.kts
-          sed -i '/implementation(libs\.firebase\.ai)/d' app/build.gradle.kts
-          sed -i '/implementation(libs\.firebase\.appcheck\.recaptcha)/d' app/build.gradle.kts
-          sed -i '/implementation(libs\.firebase\.appcheck\.debug)/d' app/build.gradle.kts
+          app = Path("app/build.gradle.kts")
+          root = Path("build.gradle.kts")
 
-          find app/src -type f \( -name '*.kt' -o -name '*.xml' \) -print0 |
-            xargs -0 sed -i 's/com\.example/ao.ciadi.ciadi_plus/g'
+          s = app.read_text()
+          s = s.replace('namespace = "com.example"', 'namespace = "ao.ciadi.ciadi_plus"')
+          s = s.replace('applicationId = "com.aistudio.ciadiplus.app"', 'applicationId = "ao.ciadi.ciadi_plus"')
+          s = s.replace('import com.google.gms.googleservices.GoogleServicesPlugin.MissingGoogleServicesStrategy\n\n', '')
+          s = s.replace('  alias(libs.plugins.google.services)\n', '')
+          s = s.replace('  implementation(platform(libs.firebase.bom))\n', '')
+          s = s.replace('  implementation(libs.firebase.ai)\n', '')
+          s = s.replace('  implementation(libs.firebase.appcheck.recaptcha)\n', '')
+          s = s.replace('  implementation(libs.firebase.appcheck.debug)\n', '')
+          import re
+          s = re.sub(r'googleServices \{[^\n]*\}\n?', '', s)
+          app.write_text(s)
 
-          ! grep -RIn 'com\.aistudio\.ciadiplus\.app' app build.gradle.kts settings.gradle.kts
-          ! grep -RIn 'com.google.gms.google-services\|google-services' app build.gradle.kts settings.gradle.kts
-          grep -RIn -m 5 'package ao\.ciadi\.ciadi_plus' app/src/main/java
-          grep -n 'applicationId = "ao.ciadi.ciadi_plus"' app/build.gradle.kts
+          root_s = root.read_text()
+          root_s = root_s.replace('  alias(libs.plugins.google.services) apply false\n', '')
+          root.write_text(root_s)
+
+          for p in Path("app/src").rglob("*"):
+              if p.is_file() and p.suffix in {".kt", ".xml"}:
+                  try:
+                      t = p.read_text()
+                  except UnicodeDecodeError:
+                      continue
+                  if "com.example" in t:
+                      p.write_text(t.replace("com.example", "ao.ciadi.ciadi_plus"))
+          PY
+
+          grep -q 'applicationId = "ao.ciadi.ciadi_plus"' app/build.gradle.kts
+          grep -q 'namespace = "ao.ciadi.ciadi_plus"' app/build.gradle.kts
+          ! grep -q 'com.aistudio.ciadiplus.app' app/build.gradle.kts
+          ! grep -q 'google-services' app/build.gradle.kts
+          ! grep -q 'google-services' build.gradle.kts
 
       - name: Setup Java
         uses: actions/setup-java@v5
@@ -63,7 +83,7 @@ jobs:
         run: |
           set -euo pipefail
           if [ ! -f debug.keystore ]; then
-            keytool -genkeypair -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 -keystore debug.keystore -storepass android -keypass android -dname "CN=Android Debug,O=Android,C=US"
+            keytool -genkeypair -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000               -keystore debug.keystore -storepass android -keypass android               -dname "CN=Android Debug,O=Android,C=US"
           fi
           test -s debug.keystore
 
@@ -84,5 +104,3 @@ jobs:
           path: ciadi-plus/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 14
-
-# CIADI+ APK build verification.
