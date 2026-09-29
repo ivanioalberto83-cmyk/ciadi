@@ -3,10 +3,85 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>CIADI — Centro Integrado de Apoio e Desenvolvimento Individual</title>
+<meta name="theme-color" content="#2563eb">
+<title>NOVA TODDLE ESCOLAR</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--primary:#2563eb;--primary2:#1d4ed8;--bg:#f4f7fb;--card:#fff;--ink:#172033;--muted:#64748b;--line:#e2e8f0;--ok:#16a34a;--danger:#dc2626}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink)}
+button,input{font:inherit}.shell{min-height:100vh}.top{height:68px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:5}.brand{display:flex;gap:12px;align-items:center}.logo{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,var(--primary),#60a5fa);display:grid;place-items:center;color:#fff;font-weight:800}.brand b{font-size:17px}.brand small{display:block;color:var(--muted)}.layout{display:grid;grid-template-columns:230px 1fr;min-height:calc(100vh - 68px)}.side{background:#0f172a;color:#cbd5e1;padding:18px 12px}.side button{width:100%;border:0;background:transparent;color:inherit;text-align:left;padding:12px;border-radius:10px;cursor:pointer;margin:2px 0}.side button.active,.side button:hover{background:#1e293b;color:#fff}.main{padding:28px;max-width:1400px;width:100%;margin:auto}.hero{background:linear-gradient(135deg,#1d4ed8,#2563eb 55%,#60a5fa);color:#fff;border-radius:20px;padding:28px;display:flex;justify-content:space-between;gap:20px;align-items:center}.hero h1{margin:0 0 7px;font-size:28px}.hero p{margin:0;opacity:.9}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:20px 0}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:0 5px 20px #0f172a08}.stat strong{font-size:30px;display:block}.stat span{color:var(--muted);font-size:13px}.section{margin-top:18px}.section h2{font-size:18px;margin:0 0 12px}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:11px 8px;border-bottom:1px solid var(--line);text-align:left;font-size:14px}.pill{display:inline-block;padding:5px 9px;border-radius:999px;background:#dbeafe;color:#1d4ed8;font-size:12px;font-weight:700}.muted{color:var(--muted)}.login{min-height:100vh;display:grid;place-items:center;padding:20px;background:linear-gradient(135deg,#eff6ff,#f8fafc)}.loginbox{width:min(430px,100%);background:#fff;border:1px solid var(--line);border-radius:22px;padding:30px;box-shadow:0 20px 50px #0f172a12}.loginbox h1{margin:0 0 6px}.loginbox p{color:var(--muted)}label{font-size:13px;font-weight:700;display:block;margin:15px 0 6px}input{width:100%;padding:12px 13px;border:1px solid #cbd5e1;border-radius:10px;outline:none}input:focus{border-color:var(--primary);box-shadow:0 0 0 3px #2563eb18}.primary{width:100%;margin-top:18px;background:var(--primary);color:#fff;border:0;padding:13px;border-radius:10px;font-weight:800;cursor:pointer}.secondary{background:#fff;color:var(--ink);border:1px solid var(--line);padding:9px 12px;border-radius:9px;cursor:pointer}.error{background:#fee2e2;color:#991b1b;padding:10px;border-radius:9px;margin-top:12px;font-size:13px}.ok{background:#dcfce7;color:#166534;padding:10px;border-radius:9px;margin-top:12px;font-size:13px}.hidden{display:none!important}.mobile{display:none}@media(max-width:900px){.layout{grid-template-columns:1fr}.side{display:none}.mobile{display:block}.grid{grid-template-columns:repeat(2,1fr)}.hero{align-items:flex-start;flex-direction:column}}@media(max-width:560px){.grid{grid-template-columns:1fr}.main{padding:16px}.top{padding:0 14px}}
+</style>
 </head>
 <body>
-<!-- A versão completa e actualizada do site CIADI está disponível no ficheiro de trabalho entregue nesta conversa. -->
-<p>CIADI — Centro Integrado de Apoio e Desenvolvimento Individual</p>
+<div id="app"></div>
+<script>
+const SUPABASE_URL="https://rojyxfjaidyvtmsmefcf.supabase.co";
+const SUPABASE_KEY="sb_publishable_NMAq5b6mRp-eD3mkbWGGgQ_PtDIzqY-";
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const app=document.getElementById("app");
+let profile=null, section="inicio";
+
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+const firstName=()=>((profile?.nome_completo||"Utilizador").trim().split(/\s+/)[0]||"Utilizador");
+
+function loginView(message=""){
+app.innerHTML=`<div class="login"><div class="loginbox">
+<div class="logo">NT</div><h1>NOVA TODDLE ESCOLAR</h1><p>Plataforma de gestão escolar, aprendizagem e comunicação.</p>
+<form id="loginForm"><label>Email</label><input id="email" type="email" autocomplete="email" required placeholder="seu@email.com">
+<label>Palavra-passe</label><input id="password" type="password" autocomplete="current-password" required placeholder="••••••••">
+<button class="primary">Entrar</button></form>${message?`<div class="error">${esc(message)}</div>`:""}
+<div id="loginMsg"></div></div></div>`;
+document.getElementById("loginForm").onsubmit=async e=>{e.preventDefault();const msg=document.getElementById("loginMsg");msg.innerHTML="A autenticar…";const {error}=await sb.auth.signInWithPassword({email:document.getElementById("email").value.trim(),password:document.getElementById("password").value});if(error){msg.innerHTML=`<div class="error">${esc(error.message)}</div>`;return}await loadProfile()};
+}
+
+async function loadProfile(){
+const {data:{user}}=await sb.auth.getUser();
+if(!user){loginView();return}
+const {data,error}=await sb.from("perfis").select("id,instituicao_id,nome_completo,email,role,ativo").eq("id",user.id).maybeSingle();
+if(error||!data){loginView("Utilizador autenticado, mas o perfil escolar não foi encontrado.");return}
+if(!data.ativo){await sb.auth.signOut();loginView("Este perfil está inativo.");return}
+profile=data;render();
+}
+
+async function logout(){await sb.auth.signOut();profile=null;loginView()}
+
+async function count(table){const {count,error}=await sb.from(table).select("*",{count:"exact",head:true});return error?0:(count||0)}
+async function dashboard(){
+const [alunos,professores,turmas,matriculas]=await Promise.all([count("alunos"),count("professores"),count("turmas"),count("matriculas")]);
+return {alunos,professores,turmas,matriculas}
+}
+
+function shell(content){
+app.innerHTML=`<div class="shell"><header class="top"><div class="brand"><div class="logo">NT</div><div><b>NOVA TODDLE ESCOLAR</b><small>${esc(profile?.role||"utilizador")}</small></div></div><button class="secondary" id="logout">Sair</button></header>
+<div class="layout"><aside class="side">
+<button data-s="inicio" class="${section==="inicio"?"active":""}">⌂ Início</button>
+<button data-s="alunos" class="${section==="alunos"?"active":""}">👨‍🎓 Alunos</button>
+<button data-s="professores" class="${section==="professores"?"active":""}">👩‍🏫 Professores</button>
+<button data-s="academico" class="${section==="academico"?"active":""}">📚 Académico</button>
+<button data-s="comunicacao" class="${section==="comunicacao"?"active":""}">💬 Comunicação</button>
+<button data-s="nova" class="${section==="nova"?"active":""}">✦ NOVA AI</button>
+</aside><main class="main">${content}</main></div></div>`;
+document.getElementById("logout").onclick=logout;
+document.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{section=b.dataset.s;render()});
+}
+
+async function render(){
+if(!profile)return loginView();
+if(section==="inicio"){const c=await dashboard();shell(`<div class="hero"><div><h1>Bom dia, ${esc(firstName())}!</h1><p>Bem-vindo ao centro de gestão da NOVA TODDLE ESCOLAR.</p></div><span class="pill">Ligado ao Supabase</span></div>
+<div class="grid"><div class="card stat"><strong>${c.alunos}</strong><span>Alunos</span></div><div class="card stat"><strong>${c.professores}</strong><span>Professores</span></div><div class="card stat"><strong>${c.turmas}</strong><span>Turmas</span></div><div class="card stat"><strong>${c.matriculas}</strong><span>Matrículas</span></div></div>
+<div class="card section"><h2>Perfil autenticado</h2><table class="table"><tr><th>Nome</th><td>${esc(profile.nome_completo)}</td></tr><tr><th>Email</th><td>${esc(profile.email)}</td></tr><tr><th>Perfil</th><td><span class="pill">${esc(profile.role)}</span></td></tr><tr><th>Instituição</th><td>${profile.instituicao_id?esc(profile.instituicao_id):'<span class="muted">Ainda não associado a uma instituição</span>'}</td></tr></table></div>`);return}
+if(section==="nova"){shell(`<div class="hero"><div><h1>NOVA AI</h1><p>Assistente escolar conectado ao perfil autenticado.</p></div></div><div class="card section"><h2>Identidade atual</h2><p>A NOVA AI deve reconhecer o utilizador pelo perfil da plataforma e usar o primeiro nome de forma natural.</p><div class="ok">Utilizador: <b>${esc(profile.nome_completo)}</b></div><p class="muted">Endpoint: nova-ai · autenticação JWT · proteção por RLS.</p></div>`);return}
+const map={alunos:["Alunos","alunos","nome_completo"],professores:["Professores","professores","numero_profissional"],academico:["Estrutura académica","turmas","nome"],comunicacao:["Comunicação","comunicados","titulo"]};
+const m=map[section];shell(`<div class="card"><h1>${m[0]}</h1><p class="muted">Módulo preparado para consumir os dados reais do Supabase. Não há dados de teste inventados.</p><div id="module">A carregar…</div></div>`);
+const {data,error}=await sb.from(m[1]).select("*").limit(20);
+const el=document.getElementById("module");
+if(error){el.innerHTML=`<div class="error">${esc(error.message)}</div>`;return}
+if(!data?.length){el.innerHTML='<p class="muted">Ainda não existem registos neste módulo.</p>';return}
+const cols=Object.keys(data[0]).slice(0,5);el.innerHTML='<table class="table"><thead><tr>'+cols.map(x=>'<th>'+esc(x)+'</th>').join('')+'</tr></thead><tbody>'+data.map(r=>'<tr>'+cols.map(x=>'<td>'+esc(r[x])+'</td>').join('')+'</tr>').join('')+'</tbody></table>';
+}
+
+sb.auth.onAuthStateChange((event,session)=>{if(event==="SIGNED_OUT"){profile=null;loginView()}});
+(async()=>{const {data:{session}}=await sb.auth.getSession();if(session)await loadProfile();else loginView()})();
+</script>
 </body>
 </html>
