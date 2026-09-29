@@ -1,0 +1,38 @@
+{
+  "name":"nova-toddle-escolar-desktop",
+  "version":"1.0.0",
+  "description":"NOVA TODDLE ESCOLAR — aplicação desktop Windows",
+  "main":"electron/main.js",
+  "author":"NOVA TODDLE",
+  "license":"UNLICENSED",
+  "scripts":{
+    "start":"electron .",
+    "dist:win":"electron-builder --win nsis --x64"
+  },
+  "devDependencies":{
+    "electron":"^38.2.0",
+    "electron-builder":"^26.0.12"
+  },
+  "build":{
+    "appId":"ao.novatoddle.escolar",
+    "productName":"NOVA TODDLE ESCOLAR",
+    "asar":true,
+    "files":[
+      "index.html",
+      "electron/**/*"
+    ],
+    "directories":{"output":"release"},
+    "win":{
+      "target":[{"target":"nsis","arch":["x64"]}],
+      "artifactName":"NOVA-TODDLE-ESCOLAR-Setup-${version}.exe"
+    },
+    "nsis":{
+      "oneClick":false,
+      "perMachine":false,
+      "allowToChangeInstallationDirectory":true,
+      "createDesktopShortcut":true,
+      "createStartMenuShortcut":true,
+      "shortcutName":"NOVA TODDLE ESCOLAR"
+    }
+  }
+}
