@@ -21,6 +21,27 @@ jobs:
           test -f ciadi-plus/settings.gradle.kts
           test -f ciadi-plus/app/build.gradle.kts
 
+      - name: Audit extracted authentication source
+        working-directory: ciadi-plus
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "=== AUTH FILES ==="
+          find app/src/main -type f | grep -E '(SupabaseAuthRepositoryImpl|SupabaseAuthApi|SupabaseClientFactory|SupabaseAuthInterceptor|AuthDtos|SupabaseConfig|RestDtos)' || true
+          for f in \\
+            app/src/main/java/com/example/data/repository/SupabaseAuthRepositoryImpl.kt \\
+            app/src/main/java/com/example/data/remote/api/SupabaseAuthApi.kt \\
+            app/src/main/java/com/example/data/remote/client/SupabaseClientFactory.kt \\
+            app/src/main/java/com/example/data/remote/interceptor/SupabaseAuthInterceptor.kt \\
+            app/src/main/java/com/example/data/remote/dto/AuthDtos.kt \\
+            app/src/main/java/com/example/data/remote/dto/RestDtos.kt \\
+            app/src/main/java/com/example/core/config/SupabaseConfig.kt; do
+            if [ -f "$f" ]; then
+              echo "===== $f ====="
+              sed -n '1,260p' "$f"
+            fi
+          done
+
       - name: Normalize Android package
         working-directory: ciadi-plus
         shell: bash
