@@ -4,15 +4,48 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>NOVA TODDLE ESCOLAR — SaaS</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
-window.__NOVA_BOOT_ERROR__ = function(message){
+window.__NOVA_BOOT_SCREEN = function(message, detail){
   var el=document.getElementById("app");
-  if(el) el.innerHTML='<div style="min-height:100vh;display:grid;place-items:center;background:#f4f7fb;padding:24px;font-family:Inter,system-ui,sans-serif"><div style="max-width:720px;background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:28px;box-shadow:0 12px 40px rgba(15,23,42,.10)"><div style="font-size:42px">⚠️</div><h1 style="margin:8px 0">NOVA TODDLE ESCOLAR</h1><p style="color:#475569">A interface iniciou, mas o componente de ligação ao Supabase não foi carregado.</p><div style="background:#fee2e2;color:#991b1b;padding:12px;border-radius:10px;font-family:ui-monospace,monospace;white-space:pre-wrap">'+String(message||"Erro desconhecido").replace(/[&<>]/g,function(x){return {"&":"&amp;","<":"&lt;",">":"&gt;"}[x]})+'</div><p style="color:#64748b">Verifique a ligação à Internet e abra novamente. O próximo build também inclui diagnóstico do carregamento da interface.</p></div></div>';
+  if(!el) return;
+  var safe=String(message||"A iniciar a aplicação…").replace(/[&<>]/g,function(x){return {"&":"&amp;","<":"&lt;",">":"&gt;"}[x]});
+  var d=detail?String(detail).replace(/[&<>]/g,function(x){return {"&":"&amp;","<":"&lt;",">":"&gt;"}[x]}):"";
+  el.innerHTML='<div style="min-height:100vh;display:grid;place-items:center;background:#f4f7fb;padding:24px;font-family:Inter,system-ui,sans-serif"><div style="width:min(620px,100%);background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:30px;box-shadow:0 12px 40px rgba(15,23,42,.10);text-align:center"><div style="width:54px;height:54px;margin:0 auto 14px;border-radius:16px;background:linear-gradient(135deg,#1d4ed8,#60a5fa);display:grid;place-items:center;color:#fff;font-weight:900;font-size:22px">NT</div><h1 style="margin:0 0 8px">NOVA TODDLE ESCOLAR</h1><p id="novaBootMessage" style="color:#475569;margin:0 0 12px">'+safe+'</p><div id="novaBootDetail" style="color:#64748b;font-size:13px;white-space:pre-wrap">'+d+'</div></div></div>';
 };
-window.addEventListener("error",function(e){ if(!window.supabase) window.__NOVA_BOOT_ERROR__(e.message||"Falha ao iniciar a interface."); });
+window.__NOVA_BOOT_ERROR__ = function(message){
+  window.__NOVA_BOOT_SCREEN("Não foi possível iniciar a interface.",message||"Erro desconhecido");
+};
+window.loadSupabaseClient = function(){
+  return new Promise(function(resolve,reject){
+    if(window.supabase && typeof window.supabase.createClient==="function"){resolve();return;}
+    var sources=[
+      "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js",
+      "https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js"
+    ];
+    var index=0;
+    function next(){
+      if(index>=sources.length){reject(new Error("Supabase JS não pôde ser carregado a partir dos CDNs configurados."));return;}
+      var src=sources[index++];
+      var s=document.createElement("script");
+      var timer=setTimeout(function(){s.remove();next();},8000);
+      s.onload=function(){clearTimeout(timer);if(window.supabase && typeof window.supabase.createClient==="function")resolve();else next();};
+      s.onerror=function(){clearTimeout(timer);s.remove();next();};
+      s.src=src;
+      document.head.appendChild(s);
+    }
+    next();
+  });
+};
+window.addEventListener("DOMContentLoaded",function(){
+  window.__NOVA_BOOT_SCREEN("A iniciar a aplicação…","A preparar o módulo de autenticação.");
+  window.loadSupabaseClient()
+    .then(function(){window.dispatchEvent(new Event("nova:supabase-ready"));})
+    .catch(function(err){window.__NOVA_BOOT_ERROR__(err.message);});
+});
+window.addEventListener("error",function(e){
+  if(!window.supabase && document.getElementById("app")) window.__NOVA_BOOT_ERROR__(e.message||"Falha ao iniciar a interface.");
+});
 </script>
-<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 :root{--p:#2563eb;--bg:#f4f7fb;--ink:#172033;--muted:#64748b;--line:#e2e8f0}
 *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink)}button,input{font:inherit}
@@ -25,9 +58,9 @@ window.addEventListener("error",function(e){ if(!window.supabase) window.__NOVA_
 </head>
 <body><div id="app"></div>
 <script>
+function initNovaApp(){
 const URL="https://rojyxfjaidyvtmsmefcf.supabase.co",KEY="sb_publishable_NMAq5b6mRp-eD3mkbWGGgQ_PtDIzqY-";
 const app=document.getElementById("app");
-if(!window.supabase){window.__NOVA_BOOT_ERROR__("Supabase JS indisponível.");throw new Error("Supabase JS indisponível");}
 const db=supabase.createClient(URL,KEY);let me=null,view="inicio";
 const LANGS=[["de","Deutsch"],["ar","العربية"],["zh","中文"],["es","Español"],["fr","Français"],["en","English"],["it","Italiano"],["ja","日本語"],["nl","Nederlands"],["pt","Português"],["pt-BR","Português do Brasil"],["ru","Русский"]];
 let lang=localStorage.getItem("nova_toddle_lang")||"pt";
@@ -173,5 +206,7 @@ if(view==="instituicao"){shell('<div class="card"><h1>Instituição</h1><p class
 if(view==="nova"){shell('<div class="hero"><h1>NOVA AI</h1><p>Assistente escolar por tenant, com identidade do utilizador e autenticação JWT.</p></div><div class="card"><p>Utilizador: <b>'+esc(me.nome_completo)+'</b></p><p class="muted">A IA deve respeitar a instituição do perfil e nunca misturar dados entre escolas.</p></div>');return}
 const map={alunos:["Alunos","alunos"],professores:["Professores","professores"],academico:["Estrutura Académica","turmas"],comunicacao:["Comunicação","comunicados"],encarregados:["Encarregados de Educação","encarregados"],admissoes:["Admissões","candidatos_admissao"],financeiro:["Financeiro","cobrancas_escolares"],documentos:["Documentos","documentos_escolares"]};const z=map[view];if(z)return list(z[0],z[1]);}
 db.auth.onAuthStateChange(e=>{if(e==="SIGNED_OUT"){me=null;login()}});(async()=>{const{data:{session}}=await db.auth.getSession();session?load():login()})();
+}
+window.addEventListener("nova:supabase-ready",initNovaApp);
 </script>
 </body></html>
