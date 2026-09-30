@@ -22,6 +22,13 @@ Aplicação web inicial da NOVA TODDLE ESCOLAR, separada do projeto CIADI.
 ## Separação de projetos
 Este código NÃO reutiliza a arquitetura clínica do CIADI. O repositório GitHub foi utilizado apenas porque é o repositório atualmente conectado ao projeto Supabase NOVA TODDLE.
 
+## Estado do build Windows
+- Workflow: `.github/workflows/build-nova-toddle-windows.yml`
+- Trigger: push na branch `nova-toddle-escolar` ou execução manual
+- Artifact principal: `nova-toddle-escolar-windows-installer`
+- Validação: `npm test` + `npm run check` antes do empacotamento
+- Instalador: `NOVA-TODDLE-ESCOLAR-Setup-1.0.0.exe`
+
 ## Próximos passos
 1. Associar a instituição ao perfil administrador.
 2. Implementar cadastro/gestão de instituição.
