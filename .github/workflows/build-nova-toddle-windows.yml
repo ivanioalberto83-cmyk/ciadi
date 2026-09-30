@@ -3,26 +3,48 @@ name: Build NOVA TODDLE ESCOLAR Windows
 on:
   workflow_dispatch:
   push:
-    branches: [nova-toddle-escolar]
+    branches:
+      - nova-toddle-escolar
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nova-toddle-windows-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-windows:
     runs-on: windows-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup Node 22
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          
+          cache: npm
 
       - name: Install dependencies
-        run: npm install
+        run: npm install --no-audit --no-fund
+
+      - name: Validate Electron entrypoint
+        run: npm run check
 
       - name: Build Setup.exe
         run: npm run dist:win
+
+      - name: Verify installer
+        shell: pwsh
+        run: |
+          $installer = Get-ChildItem -Path release -Filter *.exe -File
+          if (-not $installer) {
+            Write-Error "Nenhum instalador .exe foi produzido em release/"
+            exit 1
+          }
+          $installer | Select-Object Name, Length, FullName
 
       - name: Upload installer
         uses: actions/upload-artifact@v4
@@ -30,3 +52,14 @@ jobs:
           name: nova-toddle-escolar-windows-installer
           path: release/*.exe
           if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload build metadata
+        uses: actions/upload-artifact@v4
+        with:
+          name: nova-toddle-escolar-build-metadata
+          path: |
+            package.json
+            README_NOVA_TODDLE.md
+          if-no-files-found: error
+          retention-days: 14
