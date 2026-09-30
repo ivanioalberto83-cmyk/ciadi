@@ -12,14 +12,7 @@ window.__NOVA_BOOT_ERROR__ = function(message){
 };
 window.addEventListener("error",function(e){ if(!window.supabase) window.__NOVA_BOOT_ERROR__(e.message||"Falha ao iniciar a interface."); });
 </script>
-<script>
-if(!window.supabase){
-  var s=document.createElement("script");
-  s.src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js";
-  s.onerror=function(){window.__NOVA_BOOT_ERROR__("Supabase JS não carregou pelos dois CDNs.");};
-  document.head.appendChild(s);
-}
-</script>
+<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 :root{--p:#2563eb;--bg:#f4f7fb;--ink:#172033;--muted:#64748b;--line:#e2e8f0}
 *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink)}button,input{font:inherit}
