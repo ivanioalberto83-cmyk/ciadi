@@ -20,4 +20,4 @@ async function sendMsg(){let r=await db.from("mensagens").insert({remetente_id:S
 async function profileView(c){c.innerHTML='<h2>Meu perfil</h2><div class="card"><div class="field"><label>Nome de exibição</label><input id="nm" value="'+e(S.p.nome_exibicao||"")+'"></div><div class="field"><label>Telefone</label><input id="tel" value="'+e(S.p.telefone||"")+'"></div><button class="btn block" onclick="save()">Guardar</button></div>'}
 async function save(){let r=await db.from("perfis").update({nome_exibicao:nm.value.trim(),telefone:tel.value.trim(),updated_at:new Date().toISOString()}).eq("id",S.session.user.id);alert(r.error?r.error.message:"Perfil atualizado");await profile();render()}
 async function boot(){let r=await db.auth.getSession();S.session=r.data.session;if(!S.session)return login();await profile();shell()}db.auth.onAuthStateChange((_e,s)=>{S.session=s;if(!s)login()});boot();
-</script></body></html>
+</script><script>if("serviceWorker" in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});</script></body></html>
