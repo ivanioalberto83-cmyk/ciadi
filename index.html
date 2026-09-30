@@ -4,7 +4,22 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>NOVA TODDLE ESCOLAR — SaaS</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+window.__NOVA_BOOT_ERROR__ = function(message){
+  var el=document.getElementById("app");
+  if(el) el.innerHTML='<div style="min-height:100vh;display:grid;place-items:center;background:#f4f7fb;padding:24px;font-family:Inter,system-ui,sans-serif"><div style="max-width:720px;background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:28px;box-shadow:0 12px 40px rgba(15,23,42,.10)"><div style="font-size:42px">⚠️</div><h1 style="margin:8px 0">NOVA TODDLE ESCOLAR</h1><p style="color:#475569">A interface iniciou, mas o componente de ligação ao Supabase não foi carregado.</p><div style="background:#fee2e2;color:#991b1b;padding:12px;border-radius:10px;font-family:ui-monospace,monospace;white-space:pre-wrap">'+String(message||"Erro desconhecido").replace(/[&<>]/g,function(x){return {"&":"&amp;","<":"&lt;",">":"&gt;"}[x]})+'</div><p style="color:#64748b">Verifique a ligação à Internet e abra novamente. O próximo build também inclui diagnóstico do carregamento da interface.</p></div></div>';
+};
+window.addEventListener("error",function(e){ if(!window.supabase) window.__NOVA_BOOT_ERROR__(e.message||"Falha ao iniciar a interface."); });
+</script>
+<script>
+if(!window.supabase){
+  var s=document.createElement("script");
+  s.src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js";
+  s.onerror=function(){window.__NOVA_BOOT_ERROR__("Supabase JS não carregou pelos dois CDNs.");};
+  document.head.appendChild(s);
+}
+</script>
 <style>
 :root{--p:#2563eb;--bg:#f4f7fb;--ink:#172033;--muted:#64748b;--line:#e2e8f0}
 *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink)}button,input{font:inherit}
@@ -18,7 +33,9 @@
 <body><div id="app"></div>
 <script>
 const URL="https://rojyxfjaidyvtmsmefcf.supabase.co",KEY="sb_publishable_NMAq5b6mRp-eD3mkbWGGgQ_PtDIzqY-";
-const db=supabase.createClient(URL,KEY),app=document.getElementById("app");let me=null,view="inicio";
+const app=document.getElementById("app");
+if(!window.supabase){window.__NOVA_BOOT_ERROR__("Supabase JS indisponível.");throw new Error("Supabase JS indisponível");}
+const db=supabase.createClient(URL,KEY);let me=null,view="inicio";
 const LANGS=[["de","Deutsch"],["ar","العربية"],["zh","中文"],["es","Español"],["fr","Français"],["en","English"],["it","Italiano"],["ja","日本語"],["nl","Nederlands"],["pt","Português"],["pt-BR","Português do Brasil"],["ru","Русский"]];
 let lang=localStorage.getItem("nova_toddle_lang")||"pt";
 const TR={"pt":{"Entrar":"Entrar","Sair":"Sair","Email":"Email","Palavra-passe":"Palavra-passe","Início":"Início","Alunos":"Alunos","Professores":"Professores","Académico":"Académico","Comunicação":"Comunicação","Encarregados":"Encarregados","Admissões":"Admissões","Financeiro":"Financeiro","Documentos":"Documentos","Instituição":"Instituição","Escolas Clientes":"Escolas Clientes","Nova Escola":"Nova Escola","Planos":"Planos","Manutenção":"Manutenção","Suporte":"Suporte","Assinaturas":"Assinaturas","NOVA AI":"NOVA AI","Plataforma SaaS para várias escolas.":"Plataforma SaaS para várias escolas."},"en":{"Entrar":"Sign in","Sair":"Sign out","Email":"Email","Palavra-passe":"Password","Início":"Home","Alunos":"Students","Professores":"Teachers","Académico":"Academic","Comunicação":"Communication","Encarregados":"Guardians","Admissões":"Admissions","Financeiro":"Finance","Documentos":"Documents","Instituição":"Institution","Escolas Clientes":"Client Schools","Nova Escola":"New School","Planos":"Plans","Manutenção":"Maintenance","Suporte":"Support","Assinaturas":"Subscriptions","NOVA AI":"NOVA AI","Plataforma SaaS para várias escolas.":"SaaS platform for multiple schools."},"es":{"Entrar":"Iniciar sesión","Sair":"Salir","Email":"Correo electrónico","Palavra-passe":"Contraseña","Início":"Inicio","Alunos":"Alumnos","Professores":"Profesores","Académico":"Académico","Comunicação":"Comunicación","Encarregados":"Tutores","Admissões":"Admisiones","Financeiro":"Finanzas","Documentos":"Documentos","Instituição":"Institución","Escolas Clientes":"Escuelas cliente","Nova Escola":"Nueva escuela","Planos":"Planes","Manutenção":"Mantenimiento","Suporte":"Soporte","Assinaturas":"Suscripciones","NOVA AI":"NOVA AI","Plataforma SaaS para várias escolas.":"Plataforma SaaS para varias escuelas."},"fr":{"Entrar":"Se connecter","Sair":"Se déconnecter","Email":"E-mail","Palavra-passe":"Mot de passe","Início":"Accueil","Alunos":"Élèves","Professores":"Enseignants","Académico":"Académique","Comunicação":"Communication","Encarregados":"Responsables","Admissões":"Admissions","Financeiro":"Finance","Documentos":"Documents","Instituição":"Établissement","Escolas Clientes":"Écoles clientes","Nova Escola":"Nouvelle école","Planos":"Plans","Manutenção":"Maintenance","Suporte":"Support","Assinaturas":"Abonnements","NOVA AI":"NOVA AI","Plataforma SaaS para várias escolas.":"Plateforme SaaS pour plusieurs écoles."}};
