@@ -28,19 +28,6 @@ jobs:
           set -euo pipefail
           echo "=== AUTH FILES ==="
           find app/src/main -type f | grep -E '(SupabaseAuthRepositoryImpl|SupabaseAuthApi|SupabaseClientFactory|SupabaseAuthInterceptor|AuthDtos|SupabaseConfig|RestDtos)' || true
-          for f in \\
-            app/src/main/java/com/example/data/repository/SupabaseAuthRepositoryImpl.kt \\
-            app/src/main/java/com/example/data/remote/api/SupabaseAuthApi.kt \\
-            app/src/main/java/com/example/data/remote/client/SupabaseClientFactory.kt \\
-            app/src/main/java/com/example/data/remote/interceptor/SupabaseAuthInterceptor.kt \\
-            app/src/main/java/com/example/data/remote/dto/AuthDtos.kt \\
-            app/src/main/java/com/example/data/remote/dto/RestDtos.kt \\
-            app/src/main/java/com/example/core/config/SupabaseConfig.kt; do
-            if [ -f "$f" ]; then
-              echo "===== $f ====="
-              sed -n '1,260p' "$f"
-            fi
-          done
 
       - name: Normalize Android package
         working-directory: ciadi-plus
@@ -63,17 +50,13 @@ jobs:
           s = s.replace('  implementation(libs.firebase.appcheck.debug)\n', '')
           s = re.sub(r'googleServices \{[^\n]*\}\n?', '', s)
           app.write_text(s)
-          root_s = root.read_text()
-          root_s = root_s.replace('  alias(libs.plugins.google.services) apply false\n', '')
+          root_s = root.read_text().replace('  alias(libs.plugins.google.services) apply false\n', '')
           root.write_text(root_s)
           for p in Path("app/src").rglob("*"):
               if p.is_file() and p.suffix in {".kt", ".xml"}:
-                  try:
-                      t = p.read_text()
-                  except UnicodeDecodeError:
-                      continue
-                  if "com.example" in t:
-                      p.write_text(t.replace("com.example", "ao.ciadi.ciadi_plus"))
+                  try: t=p.read_text()
+                  except UnicodeDecodeError: continue
+                  if "com.example" in t: p.write_text(t.replace("com.example", "ao.ciadi.ciadi_plus"))
           PY
           grep -q 'applicationId = "ao.ciadi.ciadi_plus"' app/build.gradle.kts
           grep -q 'namespace = "ao.ciadi.ciadi_plus"' app/build.gradle.kts
@@ -101,9 +84,7 @@ jobs:
         run: |
           set -euo pipefail
           if [ ! -f debug.keystore ]; then
-            keytool -genkeypair -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 \
-              -keystore debug.keystore -storepass android -keypass android \
-              -dname "CN=Android Debug,O=Android,C=US"
+            keytool -genkeypair -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 -keystore debug.keystore -storepass android -keypass android -dname "CN=Android Debug,O=Android,C=US"
           fi
           test -s debug.keystore
 
@@ -124,3 +105,7 @@ jobs:
           path: ciadi-plus/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 14
+
+      # Build trigger / mobile APK delivery verification
+      - name: Build delivery marker
+        run: echo "CIADI+ APK build requested on $(date -u +%Y-%m-%dT%H:%M:%SZ)"
