@@ -1,4 +1,5 @@
 name: Deploy CIADI Plus Mobile Web
+
 on:
   workflow_dispatch:
   push:
@@ -7,17 +8,34 @@ on:
     paths:
       - ciadi-plus-web/**
       - .github/workflows/deploy-ciadi-plus-web.yml
+
 permissions:
   contents: read
   pages: write
   id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
 jobs:
   deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Mobile Web
+        uses: actions/upload-pages-artifact@v4
         with:
           path: ciadi-plus-web
-      - uses: actions/deploy-pages@v4
+
+      - name: Deploy Mobile Web
+        id: deployment
+        uses: actions/deploy-pages@v4
