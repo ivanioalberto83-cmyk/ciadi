@@ -17,17 +17,36 @@ jobs:
         run: |
           set -euo pipefail
           rm -rf ciadi-plus
-          unzip -q 'ciadi+.zip' -d ciadi-plus
+          unzip -q 'ciadi+ (1).zip' -d ciadi-plus
+          echo "=== EXTRAÍDO ==="
+          find ciadi-plus -maxdepth 3 -type f | head -100
+          if [ ! -f ciadi-plus/settings.gradle.kts ]; then
+            echo "settings.gradle.kts não encontrado na raiz; procurando o projeto Android..."
+            SETTINGS=$(find ciadi-plus -name settings.gradle.kts -print -quit)
+            if [ -z "$SETTINGS" ]; then
+              echo "ERRO: projeto Android Gradle não encontrado no ZIP."
+              exit 1
+            fi
+            PROJECT_DIR=$(dirname "$SETTINGS")
+            if [ "$PROJECT_DIR" != "ciadi-plus" ]; then
+              mkdir -p ciadi-plus-source
+              cp -a "$PROJECT_DIR"/. ciadi-plus-source/
+              rm -rf ciadi-plus
+              mv ciadi-plus-source ciadi-plus
+            fi
+          fi
           test -f ciadi-plus/settings.gradle.kts
           test -f ciadi-plus/app/build.gradle.kts
 
-      - name: Audit extracted authentication source
+      - name: Audit authentication source
         working-directory: ciadi-plus
         shell: bash
         run: |
           set -euo pipefail
           echo "=== AUTH FILES ==="
-          find app/src/main -type f | grep -E '(SupabaseAuthRepositoryImpl|SupabaseAuthApi|SupabaseClientFactory|SupabaseAuthInterceptor|AuthDtos|SupabaseConfig|RestDtos)' || true
+          find app/src/main -type f | grep -Ei '(supabase|auth|session|interceptor)' || true
+          echo "=== AUTH REFERENCES ==="
+          grep -RniE 'Bearer|Authorization|supabase|signInWith|signInWithPassword|access_token|publishable|anon' app/src/main --include='*.kt' --include='*.java' --include='*.xml' | head -250 || true
 
       - name: Normalize Android package
         working-directory: ciadi-plus
@@ -50,22 +69,25 @@ jobs:
           s = s.replace('  implementation(libs.firebase.appcheck.debug)\n', '')
           s = re.sub(r'googleServices \{[^\n]*\}\n?', '', s)
           app.write_text(s)
-          root_s = root.read_text().replace('  alias(libs.plugins.google.services) apply false\n', '')
-          root.write_text(root_s)
+          if root.exists():
+              root_s = root.read_text().replace('  alias(libs.plugins.google.services) apply false\n', '')
+              root.write_text(root_s)
           for p in Path("app/src").rglob("*"):
               if p.is_file() and p.suffix in {".kt", ".xml"}:
                   try: t=p.read_text()
                   except UnicodeDecodeError: continue
-                  if "com.example" in t: p.write_text(t.replace("com.example", "ao.ciadi.ciadi_plus"))
+                  if "com.example" in t:
+                      p.write_text(t.replace("com.example", "ao.ciadi.ciadi_plus"))
           PY
           grep -q 'applicationId = "ao.ciadi.ciadi_plus"' app/build.gradle.kts
           grep -q 'namespace = "ao.ciadi.ciadi_plus"' app/build.gradle.kts
 
-      - name: Apply CIADI+ authentication fixes
-        working-directory: ciadi-plus
+      - name: Validate no legacy CIADI+ auth patch is used
         run: |
           set -euo pipefail
-          python3 ../scripts/fix_ciadi_plus_auth.py
+          test ! -e scripts/fix_ciadi_plus_auth.py
+          test ! -e ciadi+.zip
+          test -e 'ciadi+ (1).zip'
 
       - name: Setup Java
         uses: actions/setup-java@v5
@@ -106,6 +128,5 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-      # Build trigger / mobile APK delivery verification
       - name: Build delivery marker
         run: echo "CIADI+ APK build requested on $(date -u +%Y-%m-%dT%H:%M:%SZ)"
