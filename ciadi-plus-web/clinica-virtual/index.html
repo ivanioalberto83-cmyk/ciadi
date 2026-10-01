@@ -248,3 +248,5 @@ document.getElementById("sideHelp").onclick=()=>openPanel("Ajuda",'<div class="p
 document.getElementById("sideQuality").onclick=()=>openPanel("Estado da ligação",'<div class="panelRow"><b>LiveKit</b><span id="panelLive">'+esc(document.getElementById("liveStatus").textContent)+'</span></div><div class="panelRow"><b>Estado</b><span id="panelNet">'+esc(document.getElementById("status").textContent)+'</span></div>');
 setInterval(()=>{if(document.getElementById("status")?.textContent==="Consulta ligada"){secondsInCall++;const m=String(Math.floor(secondsInCall/60)).padStart(2,"0"),s=String(secondsInCall%60).padStart(2,"0");const t=document.getElementById("timer");if(t)t.textContent="● "+m+":"+s}},1000);
 </script>
+</body>
+</html>
