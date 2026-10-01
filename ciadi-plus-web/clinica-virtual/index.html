@@ -8,60 +8,71 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.2"></script>
 <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.15.2/dist/livekit-client.umd.min.js"></script>
 <style>
-:root{--orange:#f58200;--brown:#6f351f;--yellow:#ffdf19;--bg:#f4f7f9;--ink:#20313d;--mut:#6b7b87;--line:#dfe7ec;--green:#16805c;--red:#c62828}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif}
-button{font:inherit;cursor:pointer}.page{max-width:1280px;margin:auto;padding:14px}.top{background:#fff;border:1px solid var(--line);border-radius:20px;padding:13px 17px;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 8px 30px #6f351f0d}
-.brand{display:flex;align-items:center;gap:11px}.logo{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,var(--orange),#ffb000);display:grid;place-items:center;color:#fff;font-weight:900}.brand small{display:block;color:var(--mut);margin-top:2px}.badge{padding:7px 11px;border-radius:999px;background:#fff4e8;color:#9a4c00;font-size:12px;font-weight:800;display:flex;align-items:center;gap:7px}.dot{width:8px;height:8px;border-radius:50%;background:#d99b46}.dot.ok{background:var(--green)}
-.layout{display:grid;grid-template-columns:minmax(0,2.15fr) 320px;gap:15px;margin-top:15px}.stage{background:#111a20;border-radius:22px;min-height:650px;position:relative;overflow:hidden;box-shadow:0 12px 35px #18212a22}.remote{position:absolute;inset:0;display:grid;place-items:center;background:#18212a}.remote video{width:100%;height:100%;object-fit:cover}.empty{text-align:center;color:#fff;padding:30px}.empty .icon{font-size:54px}.empty h2{margin:8px 0}.empty p{color:#b9c5cc;margin:0 auto;max-width:500px}.local{position:absolute;right:16px;top:16px;width:220px;aspect-ratio:16/10;background:#26333c;border:2px solid #fff;border-radius:14px;overflow:hidden;box-shadow:0 8px 25px #0008}.local video{width:100%;height:100%;object-fit:cover}.local span{position:absolute;left:8px;bottom:7px;color:#fff;background:#0009;border-radius:7px;padding:3px 7px;font-size:11px}
-.controls{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:8px;background:#111a20e8;padding:9px;border-radius:17px;border:1px solid #ffffff1c}.control{min-width:48px;border:1px solid #ffffff22;background:#ffffff13;color:#fff;border-radius:11px;padding:10px 12px}.control.active{background:#fff;color:#18212a}.control.end{background:var(--red);border-color:transparent}.control:disabled{opacity:.45;cursor:not-allowed}
-.side{display:grid;gap:11px;align-content:start}.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 8px 25px #6f351f0a}.card h3{margin:0 0 9px;color:var(--brown)}.info{display:grid;gap:9px}.item{padding:9px 10px;border-radius:11px;background:#fafcfd;border:1px solid var(--line)}.label{display:block;font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}.value{font-weight:750;font-size:14px}.btn{border:0;border-radius:12px;padding:12px 14px;font-weight:800;width:100%}.primary{background:var(--orange);color:#fff}.btn:disabled{opacity:.5;cursor:not-allowed}.alert{display:none;margin-top:10px;padding:11px;border-radius:11px;background:#fff0f0;color:#a61b1b;font-size:13px}.note{font-size:11px;color:var(--mut);line-height:1.45}.hidden{display:none!important}
-@media(max-width:900px){.layout{grid-template-columns:1fr}.stage{min-height:58vh}.side{grid-template-columns:1fr 1fr}.side .card:last-child{grid-column:1/-1}}
-@media(max-width:620px){.page{padding:8px}.top{border-radius:16px}.badge{font-size:10px}.layout{margin-top:9px}.stage{min-height:58vh;border-radius:17px}.local{width:125px;right:10px;top:10px}.controls{bottom:9px;padding:7px;gap:5px}.control{min-width:40px;padding:9px 8px}.side{grid-template-columns:1fr}.side .card:last-child{grid-column:auto}}
+:root{--orange:#f58200;--orange2:#ffad42;--brown:#6f351f;--ink:#152631;--mut:#74838d;--line:#e4eaee;--bg:#f5f7f8;--panel:#fff;--green:#1a9b6c;--red:#d92f38;--dark:#10181e;--dark2:#18232b}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button{font:inherit;cursor:pointer}
+.app{min-height:100vh;display:flex;flex-direction:column}.topbar{height:70px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 22px;gap:16px;position:relative;z-index:5}.brand{display:flex;align-items:center;gap:11px}.logo{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,var(--orange),var(--orange2));display:grid;place-items:center;color:#fff;font-weight:950;box-shadow:0 5px 15px #f5820030}.brand strong{font-size:15px}.brand small{display:block;color:var(--mut);font-size:11px;margin-top:2px}.session{display:flex;align-items:center;gap:16px}.consultation{text-align:right}.consultation b{display:block;font-size:13px}.consultation span{font-size:11px;color:var(--mut)}.status{display:flex;align-items:center;gap:7px;padding:8px 11px;border-radius:999px;background:#f0f8f4;font-size:11px;font-weight:800;color:#167451}.dot{width:8px;height:8px;border-radius:50%;background:#b8c1c6}.dot.ok{background:var(--green);box-shadow:0 0 0 4px #1a9b6c18}
+.main{flex:1;display:grid;grid-template-columns:minmax(0,1fr) 350px;gap:0;min-height:0}.workspace{padding:18px;min-width:0}.stage{height:calc(100vh - 106px);min-height:610px;background:var(--dark);border-radius:22px;position:relative;overflow:hidden;box-shadow:0 18px 45px #16232b20}.remote{position:absolute;inset:0;display:grid;place-items:center;background:radial-gradient(circle at 50% 38%,#273842 0,#17232a 45%,#10181e 100%)}.remote video{width:100%;height:100%;object-fit:cover}.empty{text-align:center;color:#fff;padding:30px}.empty .icon{width:70px;height:70px;margin:auto;border-radius:22px;background:#ffffff10;border:1px solid #ffffff18;display:grid;place-items:center;font-size:31px}.empty h2{margin:15px 0 7px;font-size:22px}.empty p{color:#aebbc2;margin:0 auto;max-width:480px;line-height:1.5}.local{position:absolute;right:18px;top:18px;width:230px;aspect-ratio:16/10;background:#26343d;border:1px solid #ffffff55;border-radius:16px;overflow:hidden;box-shadow:0 12px 30px #0008}.local video{width:100%;height:100%;object-fit:cover}.local span{position:absolute;left:9px;bottom:8px;color:#fff;background:#0009;border-radius:7px;padding:4px 7px;font-size:10px;font-weight:700}.timer{position:absolute;left:18px;top:18px;background:#0009;color:#fff;border:1px solid #ffffff1a;border-radius:10px;padding:8px 10px;font-size:11px;font-weight:750}.quality{position:absolute;left:18px;bottom:84px;color:#fff;background:#0009;border-radius:9px;padding:7px 9px;font-size:10px}.quality i{display:inline-block;width:7px;height:7px;border-radius:50%;background:#38b982;margin-right:6px}
+.controls{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:7px;background:#0d151be8;padding:9px;border-radius:18px;border:1px solid #ffffff18;backdrop-filter:blur(14px);box-shadow:0 12px 35px #0008}.control{width:48px;height:46px;border:1px solid #ffffff18;background:#ffffff0d;color:#fff;border-radius:13px;font-size:17px}.control:hover{background:#ffffff18}.control.active{background:#fff;color:var(--dark)}.control.end{width:55px;background:var(--red);border-color:transparent}.control:disabled{opacity:.35;cursor:not-allowed}
+.sidebar{background:#fff;border-left:1px solid var(--line);padding:18px;overflow:auto}.card{background:#fff;border:1px solid var(--line);border-radius:17px;padding:15px;margin-bottom:11px;box-shadow:0 6px 22px #24343d08}.card h3{margin:0 0 12px;font-size:14px;color:var(--brown)}.profile{display:flex;align-items:center;gap:11px}.avatar{width:42px;height:42px;border-radius:13px;background:#fff1e3;color:var(--orange);display:grid;place-items:center;font-weight:900}.profile b{font-size:13px}.profile small{display:block;color:var(--mut);margin-top:2px;font-size:11px}.info{display:grid;gap:8px;margin-top:12px}.item{padding:9px 10px;border-radius:11px;background:#fafcfd;border:1px solid var(--line)}.label{display:block;font-size:9px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}.value{font-weight:750;font-size:12px}.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.action{border:1px solid var(--line);background:#fff;border-radius:11px;padding:10px;font-size:11px;font-weight:800;color:var(--ink)}.action:hover{border-color:#f2c28f;background:#fffaf5}.primary{background:var(--orange);border-color:var(--orange);color:#fff}.btn{border:0;border-radius:12px;padding:12px 14px;font-weight:850;width:100%}.btn.primary{background:var(--orange);color:#fff}.btn:disabled{opacity:.5;cursor:not-allowed}.alert{display:none;margin-top:10px;padding:11px;border-radius:11px;background:#fff0f0;color:#a61b1b;font-size:12px;line-height:1.4}.note{font-size:10px;color:var(--mut);line-height:1.45}.hidden{display:none!important}
+.panel{position:fixed;top:70px;right:0;width:min(390px,92vw);height:calc(100vh - 70px);background:#fff;border-left:1px solid var(--line);box-shadow:-15px 0 40px #13222b18;z-index:20;padding:18px;overflow:auto;transform:translateX(105%);transition:transform .22s ease}.panel.open{transform:none}.panelHead{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}.panelHead h3{margin:0;color:var(--brown)}.close{border:1px solid var(--line);background:#fff;border-radius:10px;width:36px;height:36px}.panelRow{padding:12px;border:1px solid var(--line);border-radius:12px;margin-bottom:9px}.panelRow b{display:block;font-size:12px}.panelRow span{font-size:11px;color:var(--mut)}
+@media(max-width:1050px){.main{grid-template-columns:1fr}.sidebar{display:none}.stage{height:calc(100vh - 104px);min-height:560px}.workspace{padding:10px}.topbar{padding:0 13px}.consultation{display:none}}
+@media(max-width:620px){.topbar{height:62px}.brand small{display:none}.status{padding:7px 9px}.workspace{padding:7px}.stage{height:calc(100vh - 76px);min-height:500px;border-radius:17px}.local{width:125px;right:10px;top:10px;border-radius:12px}.timer{left:10px;top:10px}.quality{left:10px;bottom:75px}.controls{bottom:9px;padding:7px;gap:5px}.control{width:41px;height:42px;border-radius:11px;font-size:15px}.control.end{width:48px}.panel{top:62px;height:calc(100vh - 62px)}}
 </style>
 </head>
 <body>
-<div class="page">
-<header class="top">
-  <div class="brand"><div class="logo">C+</div><div><strong>CIADI+</strong><small>Clínica Virtual</small></div></div>
-  <div class="badge"><span class="dot" id="dot"></span><span id="status">A preparar sala</span></div>
+<div class="app">
+<header class="topbar">
+  <div class="brand"><div class="logo">C+</div><div><strong>CIADI+</strong><small>Clínica Virtual · Consulta segura</small></div></div>
+  <div class="session">
+    <div class="consultation"><b id="professionalTop">Profissional CIADI</b><span id="specialtyTop">Consulta virtual</span></div>
+    <div class="status"><span class="dot" id="dot"></span><span id="status">A preparar sala</span></div>
+  </div>
 </header>
-
-<main class="layout">
-<section class="stage" id="stage">
-  <div class="remote" id="remote">
-    <div class="empty" id="empty">
-      <div class="icon">🎥</div>
-      <h2 id="videoTitle">Sala de consulta</h2>
-      <p id="videoText">Entre na consulta para iniciar a ligação segura.</p>
+<main class="main">
+<section class="workspace">
+  <div class="stage" id="stage">
+    <div class="remote" id="remote">
+      <div class="empty" id="empty"><div class="icon">🎥</div><h2 id="videoTitle">Sala de consulta</h2><p id="videoText">Entre na consulta para iniciar a ligação segura.</p></div>
+    </div>
+    <div class="timer hidden" id="timer">● 00:00</div>
+    <div class="local hidden" id="local"><video id="localVideo" autoplay playsinline muted></video><span>Você</span></div>
+    <div class="quality hidden" id="quality"><i></i><span id="qualityText">Ligação estável</span></div>
+    <div class="controls">
+      <button class="control" id="mic" disabled title="Microfone">🎙️</button>
+      <button class="control" id="cam" disabled title="Câmara">📷</button>
+      <button class="control" id="screen" disabled title="Partilhar ecrã">🖥️</button>
+      <button class="control" id="infoBtn" title="Consulta">ⓘ</button>
+      <button class="control" id="chatBtn" title="Chat">💬</button>
+      <button class="control end" id="leave" disabled title="Encerrar consulta">☎</button>
     </div>
   </div>
-  <div class="local hidden" id="local"><video id="localVideo" autoplay playsinline muted></video><span>Você</span></div>
-  <div class="controls">
-    <button class="control" id="mic" disabled title="Microfone">🎙️</button>
-    <button class="control" id="cam" disabled title="Câmara">📷</button>
-    <button class="control" id="screen" disabled title="Partilhar ecrã">🖥️</button>
-    <button class="control end" id="leave" disabled title="Sair">☎</button>
-  </div>
 </section>
-
-<aside class="side">
+<aside class="sidebar">
   <div class="card">
-    <h3>Consulta</h3>
+    <h3>Consulta em curso</h3>
+    <div class="profile"><div class="avatar" id="avatar">CI</div><div><b id="professional">A carregar…</b><small id="specialty">A carregar…</small></div></div>
     <div class="info">
-      <div class="item"><span class="label">Especialidade</span><span class="value" id="specialty">A carregar…</span></div>
-      <div class="item"><span class="label">Profissional</span><span class="value" id="professional">A carregar…</span></div>
       <div class="item"><span class="label">Data e hora</span><span class="value" id="date">A carregar…</span></div>
       <div class="item"><span class="label">Agendamento</span><span class="value" id="appointment">—</span></div>
     </div>
   </div>
   <div class="card">
-    <h3>Entrada</h3>
+    <h3>Acesso</h3>
     <button class="btn primary" id="join" disabled>Entrar na consulta</button>
     <div class="alert" id="alert"></div>
-    <p class="note" style="margin-bottom:0">O acesso é validado pela sessão CIADI+ e pela Edge Function antes da entrada no LiveKit.</p>
+    <p class="note" style="margin:10px 0 0">O acesso é validado pela sessão CIADI+ e pela Edge Function antes da entrada no LiveKit.</p>
   </div>
   <div class="card">
-    <h3>Ligação</h3>
+    <h3>Ferramentas</h3>
+    <div class="actions">
+      <button class="action" id="sideInfo">📋 Consulta</button>
+      <button class="action" id="sideChat">💬 Chat</button>
+      <button class="action" id="sideHelp">❔ Ajuda</button>
+      <button class="action" id="sideQuality">📶 Ligação</button>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Estado técnico</h3>
     <div class="info">
       <div class="item"><span class="label">Supabase/Auth</span><span class="value" id="authStatus">A verificar…</span></div>
       <div class="item"><span class="label">Edge Function</span><span class="value" id="edgeStatus">A aguardar entrada</span></div>
@@ -70,8 +81,11 @@ button{font:inherit;cursor:pointer}.page{max-width:1280px;margin:auto;padding:14
   </div>
 </aside>
 </main>
+<div class="panel" id="panel">
+  <div class="panelHead"><h3 id="panelTitle">Consulta</h3><button class="close" id="panelClose">×</button></div>
+  <div id="panelBody"></div>
 </div>
-
+</div>
 <script>
 const SUPABASE_URL="https://egpkkttbcaukqnnxyhjv.supabase.co";
 const SUPABASE_KEY="sb_publishable_SSA6B6gfnaUxKhOzReE6HQ_utqQRebz";
@@ -127,8 +141,8 @@ async function prepare(){
     if(!["online","video","virtual"].includes(modalidade)) throw new Error("Este agendamento não está configurado como consulta online.");
     const estado=String(a.estado||"").toLowerCase();
     if(["cancelada","cancelado","concluida","concluído","concluída","faltou"].includes(estado)) throw new Error("Esta consulta não está disponível.");
-    $("specialty").textContent=a.especialidades?.nome||"Consulta CIADI";
-    $("professional").textContent=a.profissionais?.nome_completo||"Profissional CIADI";
+    $("specialty").textContent=a.especialidades?.nome||"Consulta CIADI";$("specialtyTop").textContent=a.especialidades?.nome||"Consulta virtual";
+    $("professional").textContent=a.profissionais?.nome_completo||"Profissional CIADI";$("professionalTop").textContent=a.profissionais?.nome_completo||"Profissional CIADI";$("avatar").textContent=(a.profissionais?.nome_completo||"CI").split(/\\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase();
     $("date").textContent=fmtDate(a.data_hora);
     $("join").disabled=false;
     setStatus("Agendamento confirmado",true);
@@ -195,7 +209,7 @@ async function connectRoom(){
   setupRoom(room);
   $("liveStatus").textContent="A ligar…";
   await room.connect(url,token,{autoSubscribe:true});
-  $("liveStatus").textContent="Ligado";
+  $("liveStatus").textContent="Ligado";$("timer").classList.remove("hidden");$("quality").classList.remove("hidden");
   joined=true;setStatus("Consulta ligada",true);
   $("mic").disabled=false;$("cam").disabled=false;$("leave").disabled=false;
   const canScreen=!!room.localParticipant?.permissions?.canPublishSources?.includes?.("screen_share");
@@ -216,9 +230,21 @@ $("join").onclick=async()=>{try{await connectRoom()}catch(e){fail(e?.message||"N
 $("mic").onclick=async()=>{if(!room)return;const enabled=room.localParticipant.isMicrophoneEnabled;await room.localParticipant.setMicrophoneEnabled(!enabled);$("mic").classList.toggle("active",!enabled)};
 $("cam").onclick=async()=>{if(!room)return;const enabled=room.localParticipant.isCameraEnabled;await room.localParticipant.setCameraEnabled(!enabled);$("cam").classList.toggle("active",!enabled);if(enabled)$("local").classList.add("hidden");else showLocal()};
 $("screen").onclick=async()=>{if(!room)return;try{const enabled=room.localParticipant.isScreenShareEnabled;await room.localParticipant.setScreenShareEnabled(!enabled);$("screen").classList.toggle("active",!enabled)}catch(e){fail(e.message||"Não foi possível partilhar o ecrã.")}};
-$("leave").onclick=async()=>{manualLeave=true;clearTimeout(reconnectTimer);reconnectTimer=null;if(room)await room.disconnect();room=null;joined=false;$("mic").disabled=true;$("cam").disabled=true;$("screen").disabled=true;$("leave").disabled=true;$("join").disabled=false;$("local").classList.add("hidden");$("empty").classList.remove("hidden");$("liveStatus").textContent="Desligado";setStatus("Consulta encerrada")};
+$("leave").onclick=async()=>{manualLeave=true;clearTimeout(reconnectTimer);reconnectTimer=null;if(room)await room.disconnect();room=null;joined=false;$("mic").disabled=true;$("cam").disabled=true;$("screen").disabled=true;$("leave").disabled=true;$("join").disabled=false;$("local").classList.add("hidden");$("empty").classList.remove("hidden");$("liveStatus").textContent="Desligado";$("timer").classList.add("hidden");$("quality").classList.add("hidden");setStatus("Consulta encerrada")};
 window.addEventListener("beforeunload",()=>{if(room)room.disconnect()});
 prepare();
 </script>
 </body>
 </html>
+<script>
+let panelTimer=null,secondsInCall=0;
+function openPanel(title,body){document.getElementById("panelTitle").textContent=title;document.getElementById("panelBody").innerHTML=body;document.getElementById("panel").classList.add("open")}
+document.getElementById("panelClose").onclick=()=>document.getElementById("panel").classList.remove("open");
+document.getElementById("infoBtn").onclick=()=>openPanel("Dados da consulta",'<div class="panelRow"><b>Especialidade</b><span>'+esc(document.getElementById("specialty").textContent)+'</span></div><div class="panelRow"><b>Profissional</b><span>'+esc(document.getElementById("professional").textContent)+'</span></div><div class="panelRow"><b>Data e hora</b><span>'+esc(document.getElementById("date").textContent)+'</span></div><div class="panelRow"><b>Agendamento</b><span>'+esc(document.getElementById("appointment").textContent)+'</span></div>');
+document.getElementById("sideInfo").onclick=()=>document.getElementById("infoBtn").click();
+document.getElementById("chatBtn").onclick=()=>openPanel("Chat da consulta",'<div class="panelRow"><b>Chat CIADI+</b><span>O chat da consulta será ligado à área de mensagens clínicas na próxima etapa.</span></div>');
+document.getElementById("sideChat").onclick=()=>document.getElementById("chatBtn").click();
+document.getElementById("sideHelp").onclick=()=>openPanel("Ajuda",'<div class="panelRow"><b>Antes de entrar</b><span>Verifique a câmara, o microfone e a ligação à Internet.</span></div><div class="panelRow"><b>Durante a consulta</b><span>Use os controlos inferiores para desligar áudio, câmara ou partilhar o ecrã.</span></div>');
+document.getElementById("sideQuality").onclick=()=>openPanel("Estado da ligação",'<div class="panelRow"><b>LiveKit</b><span id="panelLive">'+esc(document.getElementById("liveStatus").textContent)+'</span></div><div class="panelRow"><b>Estado</b><span id="panelNet">'+esc(document.getElementById("status").textContent)+'</span></div>');
+setInterval(()=>{if(window.joined){secondsInCall++;const m=String(Math.floor(secondsInCall/60)).padStart(2,"0"),s=String(secondsInCall%60).padStart(2,"0");const t=document.getElementById("timer");if(t)t.textContent="● "+m+":"+s}},1000);
+</script>
