@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="pt-AO">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f58200">
+<title>CIADI+ — Clínica Virtual</title>
+<style>
+:root{--orange:#f58200;--brown:#6f351f;--yellow:#ffdf19;--cream:#fff8ef;--bg:#f7fafc;--ink:#263746;--mut:#6b7b87;--line:#e4eaee;--green:#16805c}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif}
+button{font:inherit;cursor:pointer}.page{max-width:1180px;margin:auto;padding:18px}.top{background:#fff;border:1px solid var(--line);border-radius:22px;padding:15px 18px;display:flex;align-items:center;justify-content:space-between;gap:15px;box-shadow:0 8px 30px #6f351f0d}
+.brand{display:flex;align-items:center;gap:12px}.logo{width:48px;height:48px;border-radius:15px;background:linear-gradient(135deg,var(--orange),#ffb000);display:grid;place-items:center;color:#fff;font-weight:900;font-size:17px}.brand small{display:block;color:var(--mut);margin-top:3px}
+.badge{padding:8px 12px;border-radius:999px;background:#fff4e8;color:#9a4c00;font-size:12px;font-weight:800}
+.grid{display:grid;grid-template-columns:minmax(0,2fr) minmax(280px,1fr);gap:18px;margin-top:18px}
+.video{height:610px;background:#18212a;border-radius:24px;position:relative;overflow:hidden;display:grid;place-items:center;box-shadow:0 12px 35px #18212a22}
+.video .placeholder{text-align:center;color:#fff;padding:30px}.camera{font-size:54px;margin-bottom:12px}.placeholder h2{margin:0 0 8px}.placeholder p{color:#b8c4cc;margin:0 auto;max-width:450px}
+.controls{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);display:flex;gap:9px;background:#111a20dd;padding:10px;border-radius:18px}
+.control{border:1px solid #ffffff25;background:#ffffff13;color:#fff;border-radius:12px;padding:10px 13px}.control.end{background:#c62828}
+.side{display:grid;gap:12px;align-content:start}.card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:0 8px 25px #6f351f0a}.card h3{margin:0 0 8px;color:var(--brown)}
+.info{display:grid;gap:11px}.item{padding:11px 12px;border-radius:13px;background:#fafcfd;border:1px solid var(--line)}.label{display:block;font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}.value{font-weight:750}
+.btn{border:0;border-radius:13px;padding:12px 15px;font-weight:800;width:100%}.primary{background:var(--orange);color:#fff}.secondary{background:#fff1e3;color:#9a4c00}.btn:disabled{opacity:.5;cursor:not-allowed}
+.status{display:flex;align-items:center;gap:8px}.dot{width:9px;height:9px;border-radius:50%;background:#d99b46}.dot.ok{background:var(--green)}
+.alert{display:none;margin-top:12px;padding:12px;border-radius:13px;background:#fff0f0;color:#a61b1b;font-size:13px}.note{font-size:12px;color:var(--mut);line-height:1.5}
+@media(max-width:850px){.page{padding:10px}.grid{grid-template-columns:1fr}.video{height:58vh;min-height:430px}.top{border-radius:17px}.brand small{font-size:11px}.badge{display:none}}
+</style>
+</head>
+<body>
+<div class="page">
+<header class="top">
+  <div class="brand"><div class="logo">C+</div><div><strong>CIADI+</strong><small>Clínica Virtual</small></div></div>
+  <div class="badge status"><span class="dot" id="dot"></span><span id="status">A preparar sala</span></div>
+</header>
+
+<div class="grid">
+<section class="video">
+  <div class="placeholder">
+    <div class="camera">🎥</div>
+    <h2 id="videoTitle">Sala de consulta</h2>
+    <p id="videoText">A sala está preparada. A ligação segura ao Supabase, Edge Function e LiveKit será ativada nesta interface.</p>
+  </div>
+  <div class="controls">
+    <button class="control" id="mic" disabled>🎙️</button>
+    <button class="control" id="cam" disabled>📷</button>
+    <button class="control" id="screen" disabled>🖥️</button>
+    <button class="control end" id="leave" disabled>☎</button>
+  </div>
+</section>
+
+<aside class="side">
+  <div class="card">
+    <h3>Consulta</h3>
+    <div class="info">
+      <div class="item"><span class="label">Especialidade</span><span class="value" id="specialty">A carregar…</span></div>
+      <div class="item"><span class="label">Profissional</span><span class="value" id="professional">A carregar…</span></div>
+      <div class="item"><span class="label">Data e hora</span><span class="value" id="date">A carregar…</span></div>
+      <div class="item"><span class="label">Agendamento</span><span class="value" id="appointment">—</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Entrada</h3>
+    <button class="btn primary" id="join" disabled>Entrar na consulta</button>
+    <div class="alert" id="alert"></div>
+    <p class="note" style="margin-bottom:0">Apenas o paciente/responsável e o profissional autorizados poderão entrar na sala.</p>
+  </div>
+  <div class="card">
+    <h3>Ligação da plataforma</h3>
+    <div class="info">
+      <div class="item"><span class="label">Supabase</span><span class="value" id="supabaseStatus">Preparado</span></div>
+      <div class="item"><span class="label">Edge Function</span><span class="value">A ligar no próximo passo</span></div>
+      <div class="item"><span class="label">LiveKit</span><span class="value">A ligar no próximo passo</span></div>
+    </div>
+  </div>
+</aside>
+</div>
+</div>
+
+<script>
+const SUPABASE_URL="https://egpkkttbcaukqnnxyhjv.supabase.co";
+const SUPABASE_KEY="sb_publishable_SSA6B6gfnaUxKhOzReE6HQ_utqQRebz";
+const qs=new URLSearchParams(location.search);
+const appointmentId=qs.get("agendamento_id")||qs.get("agendamento");
+const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const $=id=>document.getElementById(id);
+function fail(message){$("alert").style.display="block";$("alert").textContent=message;$("status").textContent="Sala não disponível";$("dot").classList.remove("ok")}
+async function prepare(){
+  $("appointment").textContent=appointmentId||"não informado";
+  if(!appointmentId){fail("Esta sala precisa de um agendamento_id.");return}
+  $("status").textContent="A consultar agendamento…";
+  try{
+    const res=await fetch(SUPABASE_URL+"/rest/v1/agendamentos?id=eq."+encodeURIComponent(appointmentId)+"&select=id,data_hora,duracao_minutos,tipo,modalidade,estado,profissionais(nome_completo),especialidades(nome)",{headers:{apikey:SUPABASE_KEY}});
+    const rows=await res.json();
+    if(!res.ok)throw new Error("Não foi possível consultar o agendamento.");
+    const a=rows[0];
+    if(!a)throw new Error("Agendamento não encontrado.");
+    const modalidade=String(a.modalidade||a.tipo||"").toLowerCase();
+    if(!["online","video","virtual"].includes(modalidade))throw new Error("Este agendamento não está configurado como consulta online.");
+    const estado=String(a.estado||"").toLowerCase();
+    if(["cancelada","cancelado","concluida","concluído","concluída","faltou"].includes(estado))throw new Error("Esta consulta não está disponível.");
+    $("specialty").textContent=a.especialidades?.nome||"Consulta CIADI";
+    $("professional").textContent=a.profissionais?.nome_completo||"Profissional CIADI";
+    $("date").textContent=a.data_hora?new Date(a.data_hora).toLocaleString("pt-AO",{dateStyle:"medium",timeStyle:"short"}):"—";
+    $("status").textContent="Agendamento confirmado";
+    $("dot").classList.add("ok");
+    $("join").disabled=false;
+  }catch(err){fail(err.message||"Erro ao preparar a sala.")}
+}
+$("join").onclick=()=>alert("A interface está pronta. No próximo passo ligaremos esta entrada à Edge Function ciadi-video-token e ao LiveKit.");
+prepare();
+</script>
+</body>
+</html>
