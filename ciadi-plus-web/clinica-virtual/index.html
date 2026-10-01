@@ -6,6 +6,8 @@
 <meta name="theme-color" content="#f58200">
 <title>CIADI+ — Clínica Virtual</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.2"></script>
+</body>
+</html>
 <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.15.2/dist/livekit-client.umd.min.js"></script>
 <style>
 :root{--orange:#f58200;--orange2:#ffad42;--brown:#6f351f;--ink:#152631;--mut:#74838d;--line:#e4eaee;--bg:#f5f7f8;--panel:#fff;--green:#1a9b6c;--red:#d92f38;--dark:#10181e;--dark2:#18232b}
@@ -234,8 +236,6 @@ $("leave").onclick=async()=>{manualLeave=true;clearTimeout(reconnectTimer);recon
 window.addEventListener("beforeunload",()=>{if(room)room.disconnect()});
 prepare();
 </script>
-</body>
-</html>
 <script>
 let panelTimer=null,secondsInCall=0;
 function openPanel(title,body){document.getElementById("panelTitle").textContent=title;document.getElementById("panelBody").innerHTML=body;document.getElementById("panel").classList.add("open")}
@@ -246,5 +246,5 @@ document.getElementById("chatBtn").onclick=()=>openPanel("Chat da consulta",'<di
 document.getElementById("sideChat").onclick=()=>document.getElementById("chatBtn").click();
 document.getElementById("sideHelp").onclick=()=>openPanel("Ajuda",'<div class="panelRow"><b>Antes de entrar</b><span>Verifique a câmara, o microfone e a ligação à Internet.</span></div><div class="panelRow"><b>Durante a consulta</b><span>Use os controlos inferiores para desligar áudio, câmara ou partilhar o ecrã.</span></div>');
 document.getElementById("sideQuality").onclick=()=>openPanel("Estado da ligação",'<div class="panelRow"><b>LiveKit</b><span id="panelLive">'+esc(document.getElementById("liveStatus").textContent)+'</span></div><div class="panelRow"><b>Estado</b><span id="panelNet">'+esc(document.getElementById("status").textContent)+'</span></div>');
-setInterval(()=>{if(window.joined){secondsInCall++;const m=String(Math.floor(secondsInCall/60)).padStart(2,"0"),s=String(secondsInCall%60).padStart(2,"0");const t=document.getElementById("timer");if(t)t.textContent="● "+m+":"+s}},1000);
+setInterval(()=>{if(document.getElementById("status")?.textContent==="Consulta ligada"){secondsInCall++;const m=String(Math.floor(secondsInCall/60)).padStart(2,"0"),s=String(secondsInCall%60).padStart(2,"0");const t=document.getElementById("timer");if(t)t.textContent="● "+m+":"+s}},1000);
 </script>
