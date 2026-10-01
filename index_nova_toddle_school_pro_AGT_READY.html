@@ -85,7 +85,7 @@ function login(msg=""){app.innerHTML=`<div class="login"><div class="loginbox"><
 async function load(){const{data:{user}}=await db.auth.getUser();if(!user)return login();const{data,error}=await db.from("perfis").select("id,instituicao_id,nome_completo,email,role,ativo").eq("id",user.id).maybeSingle();if(error||!data)return login("Perfil não encontrado.");if(!data.ativo){await db.auth.signOut();return login("Perfil inativo.");}me=data;render()}
 async function out(){await db.auth.signOut();me=null;login()}
 async function count(t){const{count,error}=await db.from(t).select("*",{count:"exact",head:true});return error?0:count||0}
-function shell(body){app.innerHTML=`<header class="top"><div class="brand"><div class="logo">NT</div><div><b>NOVA TODDLE ESCOLAR</b><small>${admin()?"Super Admin da Plataforma":esc(me.role)}</small></div></div><div style="display:flex;gap:10px;align-items:center"><span style="font-size:12px">🌐</span>${languageSelector()}<button class="secondary" id="out">${t("Sair")}</button></div></header><div class="layout"><aside class="side"><button data-v="inicio">⌂ ${t("Início")}</button><button data-v="alunos">👨‍🎓 ${t("Alunos")}</button><button data-v="professores">👩‍🏫 ${t("Professores")}</button><button data-v="academico">📚 ${t("Académico")}</button><button data-v="anos-letivos">📅 Anos Letivos</button><button data-v="matriculas">📝 Matrículas</button><button data-v="presencas">✅ Presenças</button><button data-v="avaliacoes">📊 Avaliações</button><button data-v="progresso">📈 Progresso</button><button data-v="comunicacao">💬 ${t("Comunicação")}</button><button data-v="sos">🚨 SOS & Denúncias</button><button data-v="encarregados">👨‍👩‍👧 ${t("Encarregados")}</button><button data-v="admissoes">📝 ${t("Admissões")}</button><button data-v="financeiro">💰 ${t("Financeiro")}</button><button data-v="fiscal">🧾 Faturação & Fiscal</button><button data-v="documentos">📄 ${t("Documentos")}</button><button data-v="biblioteca">📚 Biblioteca</button><button data-v="transporte">🚌 Transporte</button><button data-v="inventario">📦 Inventário</button><button data-v="rh">👥 RH</button><button data-v="saude">🏥 Saúde</button><button data-v="portaria">🚪 Portaria</button><button data-v="atividades">🎯 Atividades</button><button data-v="comportamento">🧠 Comportamento</button><button data-v="certificados">📜 Certificados</button><button data-v="cantina">🍽️ Cantina</button><button data-v="instalacoes">🏢 Instalações</button><button data-v="compras">🛒 Compras</button><button data-v="lms">🎓 LMS</button><button data-v="instituicao">🏫 ${t("Instituição")}</button><button data-v="nova">✦ ${t("NOVA AI")}</button>${admin()?'<hr><button data-v="escolas">🏢 ${t("Escolas Clientes")}</button><button data-v="nova-escola">➕ ${t("Nova Escola")}</button><button data-v="planos">▣ ${t("Planos")}</button><button data-v="manutencao">🛠 ${t("Manutenção")}</button><button data-v="suporte">🎫 ${t("Suporte")}</button><button data-v="assinaturas">💳 ${t("Assinaturas")}</button>':""}</aside><main class="main">${body}</main></div>`;out.onclick=out;const langEl=document.getElementById("lang");if(langEl)langEl.onchange=()=>{lang=langEl.value;localStorage.setItem("nova_toddle_lang",lang);render()};document.querySelectorAll("[data-v]").forEach(b=>{if(b.dataset.v===view)b.classList.add("active");b.onclick=()=>{view=b.dataset.v;render()}})}
+function shell(body){app.innerHTML=`<header class="top"><div class="brand"><div class="logo">NT</div><div><b>NOVA TODDLE ESCOLAR</b><small>${admin()?"Super Admin da Plataforma":esc(me.role)}</small></div></div><div style="display:flex;gap:10px;align-items:center"><span style="font-size:12px">🌐</span>${languageSelector()}<button class="secondary" id="out">${t("Sair")}</button></div></header><div class="layout"><aside class="side"><button data-v="inicio">⌂ ${t("Início")}</button><button data-v="alunos">👨‍🎓 ${t("Alunos")}</button><button data-v="professores">👩‍🏫 ${t("Professores")}</button><button data-v="academico">📚 ${t("Académico")}</button><button data-v="anos-letivos">📅 Anos Letivos</button><button data-v="matriculas">📝 Matrículas</button><button data-v="presencas">✅ Presenças</button><button data-v="avaliacoes">📊 Avaliações</button><button data-v="progresso">📈 Progresso</button><button data-v="comunicacao">💬 ${t("Comunicação")}</button><button data-v="sos">🚨 SOS & Denúncias</button><button data-v="encarregados">👨‍👩‍👧 ${t("Encarregados")}</button><button data-v="admissoes">📝 ${t("Admissões")}</button><button data-v="financeiro">💰 ${t("Financeiro")}</button><button data-v="fiscal">🧾 Faturação & Fiscal</button><button data-v="contabilidade">📚 Contabilidade</button><button data-v="documentos">📄 ${t("Documentos")}</button><button data-v="biblioteca">📚 Biblioteca</button><button data-v="transporte">🚌 Transporte</button><button data-v="inventario">📦 Inventário</button><button data-v="rh">👥 RH</button><button data-v="saude">🏥 Saúde</button><button data-v="portaria">🚪 Portaria</button><button data-v="atividades">🎯 Atividades</button><button data-v="comportamento">🧠 Comportamento</button><button data-v="certificados">📜 Certificados</button><button data-v="cantina">🍽️ Cantina</button><button data-v="instalacoes">🏢 Instalações</button><button data-v="compras">🛒 Compras</button><button data-v="lms">🎓 LMS</button><button data-v="instituicao">🏫 ${t("Instituição")}</button><button data-v="nova">✦ ${t("NOVA AI")}</button>${admin()?'<hr><button data-v="escolas">🏢 ${t("Escolas Clientes")}</button><button data-v="nova-escola">➕ ${t("Nova Escola")}</button><button data-v="planos">▣ ${t("Planos")}</button><button data-v="manutencao">🛠 ${t("Manutenção")}</button><button data-v="suporte">🎫 ${t("Suporte")}</button><button data-v="assinaturas">💳 ${t("Assinaturas")}</button>':""}</aside><main class="main">${body}</main></div>`;out.onclick=out;const langEl=document.getElementById("lang");if(langEl)langEl.onchange=()=>{lang=langEl.value;localStorage.setItem("nova_toddle_lang",lang);render()};document.querySelectorAll("[data-v]").forEach(b=>{if(b.dataset.v===view)b.classList.add("active");b.onclick=()=>{view=b.dataset.v;render()}})}
 async function createSchool(){shell('<div class="card"><h1>Nova escola cliente</h1><p class="muted">Crie o tenant e envie o convite ao administrador.</p><form id="sf"><label>Nome da escola</label><input id="sn" required><label>Nome curto</label><input id="sc"><label>Slug</label><input id="ss" required><label>Cidade</label><input id="city" value="Luanda"><label>Email do administrador</label><input id="se" type="email" required><label>Logotipo da escola</label><input id="logo" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml"><small class="muted">PNG, JPG, WEBP ou SVG · máximo 2 MB</small><label>Nome do administrador</label><input id="sa"><label>Plano</label><input id="sp" value="standard"><button class="primary">Criar escola e enviar convite</button></form><div id="sm"></div></div>');sf.onsubmit=async e=>{e.preventDefault();sm.innerHTML='<div class="warn">A criar escola…</div>';const{data,error}=await db.functions.invoke("platform-onboarding",{body:{nome:sn.value,nome_curto:sc.value,slug:ss.value,cidade:city.value,email:se.value,admin_nome:sa.value,plano:sp.value}});if(error||data?.error){sm.innerHTML='<div class="error">'+esc(error?.message||data?.error||"Falha no onboarding.")+'</div>';return}
 if(logo.files?.[0]){
  const file=logo.files[0];
@@ -459,6 +459,105 @@ async function financeiro(){
  }
  await draw();
 }
+
+async function contabilidade(){
+ if(!school()){shell('<div class="warn">Associe este perfil a uma escola para gerir a contabilidade.</div>');return}
+ const canManage=admin()||["school_admin","accountant","principal"].includes(me.role);
+ const [{data:contas,error:ce},{data:periodos,error:pe},{data:lanc,error:le},{data:cfg,error:xe},{data:docs,error:de}]=await Promise.all([
+  db.from("plano_contas_contabil").select("id,codigo,nome,classe,tipo,conta_pai_id,analitica,ativa").eq("instituicao_id",me.instituicao_id).order("codigo"),
+  db.from("periodos_contabeis").select("id,ano,mes,estado,fechado_em,fechado_por").eq("instituicao_id",me.instituicao_id).order("ano",{ascending:false}).order("mes",{ascending:false}),
+  db.from("lancamentos_contabeis").select("id,periodo_id,data_lancamento,diario,descricao,origem_tipo,origem_id,documento_id,estado,created_at").eq("instituicao_id",me.instituicao_id).order("data_lancamento",{ascending:false}).limit(100),
+  db.from("config_contabil_fiscal").select("*").eq("instituicao_id",me.instituicao_id).maybeSingle(),
+  db.from("documentos_fiscais").select("id,numero,tipo,data_emissao,total,estado").eq("instituicao_id",me.instituicao_id).order("data_emissao",{ascending:false}).limit(50)
+ ]);
+ if(ce||pe||le||xe||de){shell('<div class="error">'+esc(ce?.message||pe?.message||le?.message||xe?.message||de?.message)+'</div>');return}
+ const cc=contas||[], pp=periodos||[], ll=lanc||[], dd=docs||[];
+ const aberto=pp.filter(x=>x.estado==="aberto").length;
+ const debMap={}; const credMap={};
+ if(ll.length){
+   const ids=ll.map(x=>x.id);
+   const {data:lin}=await db.from("lancamento_linhas_contabeis").select("lancamento_id,conta_id,debito,credito").in("lancamento_id",ids);
+   (lin||[]).forEach(x=>{debMap[x.lancamento_id]=(debMap[x.lancamento_id]||0)+Number(x.debito||0);credMap[x.lancamento_id]=(credMap[x.lancamento_id]||0)+Number(x.credito||0)});
+ }
+ const periodOpts=pp.filter(x=>x.estado==="aberto").map(x=>'<option value="'+esc(x.id)+'">'+esc(x.mes+'/'+x.ano)+'</option>').join("");
+ const parentOpts='<option value="">Sem conta pai</option>'+cc.filter(x=>!x.analitica).map(x=>'<option value="'+esc(x.id)+'">'+esc(x.codigo+" · "+x.nome)+'</option>').join("");
+ const mapOpts='<option value="">Não configurada</option>'+cc.filter(x=>x.ativa&&x.analitica).map(x=>'<option value="'+esc(x.id)+'">'+esc(x.codigo+" · "+x.nome)+'</option>').join("");
+ const selected=id=>id?'<option value="'+esc(id)+'" selected>'+esc((cc.find(x=>x.id===id)?.codigo||"Conta")+' · '+(cc.find(x=>x.id===id)?.nome||id))+'</option>':"";
+ shell(
+ '<div class="hero"><h1>📚 Contabilidade</h1><p>Plano de contas, períodos, partidas dobradas, integração fiscal e fecho mensal.</p></div>'+
+ '<div class="grid"><div class="card stat"><strong>'+cc.length+'</strong><span>Contas</span></div><div class="card stat"><strong>'+pp.length+'</strong><span>Períodos</span></div><div class="card stat"><strong>'+aberto+'</strong><span>Períodos abertos</span></div><div class="card stat"><strong>'+ll.length+'</strong><span>Lançamentos recentes</span></div></div>'+
+ (canManage?'<div class="card" style="margin-top:16px"><h2>🧮 Plano de contas</h2><form id="ctForm" class="grid" style="grid-template-columns:repeat(3,1fr)"><div><label>Código</label><input id="ctCodigo" required placeholder="Ex.: 31.01"></div><div><label>Nome</label><input id="ctNome" required placeholder="Conta analítica"></div><div><label>Classe</label><input id="ctClasse" type="number" min="1" max="9" placeholder="3"></div><div><label>Tipo</label><select id="ctTipo"><option value="ativo">Ativo</option><option value="passivo">Passivo</option><option value="capital">Capital</option><option value="rendimento">Rendimento</option><option value="gasto">Gasto</option><option value="ordem">Ordem</option></select></div><div><label>Conta pai</label><select id="ctPai">'+parentOpts+'</select></div><div><label>Analítica</label><select id="ctAnalitica"><option value="true">Sim</option><option value="false">Não</option></select></div><div style="grid-column:1/-1"><button class="primary" style="max-width:260px">Criar conta</button></div></form><div id="ctMsg"></div></div>':'')+
+ '<div class="card" style="margin-top:16px"><h2>⚙️ Mapeamento fiscal → contabilístico</h2><p class="muted">As contas abaixo são usadas pelas funções de contabilização automática de documentos e recebimentos fiscais.</p>'+
+ (canManage?'<form id="mapForm" class="grid" style="grid-template-columns:repeat(2,1fr)"><div><label>Clientes / Contas a receber</label><select id="mpClientes"><option value="">Selecionar…</option>'+mapOpts+'</select></div><div><label>Receita</label><select id="mpReceita"><option value="">Selecionar…</option>'+mapOpts+'</select></div><div><label>IVA liquidado</label><select id="mpIva"><option value="">Selecionar…</option>'+mapOpts+'</select></div><div><label>Caixa</label><select id="mpCaixa"><option value="">Selecionar…</option>'+mapOpts+'</select></div><div><label>Banco</label><select id="mpBanco"><option value="">Selecionar…</option>'+mapOpts+'</select></div><div><label>Advertências</label><select id="mpAdv"><option value="">Selecionar…</option>'+mapOpts+'</select></div><div style="grid-column:1/-1"><button class="secondary">Guardar mapeamento</button></div></form><div id="mapMsg"></div>':'<div class="warn">Sem permissão para alterar o mapeamento contabilístico.</div>')+'</div>'+
+ (canManage?'<div class="card" style="margin-top:16px"><h2>📅 Períodos contabilísticos</h2><form id="perForm" class="grid" style="grid-template-columns:repeat(3,1fr)"><div><label>Ano</label><input id="perAno" type="number" min="2020" max="2100" value="'+new Date().getFullYear()+'" required></div><div><label>Mês</label><input id="perMes" type="number" min="1" max="12" value="'+(new Date().getMonth()+1)+'" required></div><div style="display:flex;align-items:end"><button class="primary" style="max-width:220px">Abrir período</button></div></form><div id="perMsg"></div></div>':'')+
+ '<div class="card" style="margin-top:16px"><h2>📑 Integração fiscal</h2><p class="muted">Documentos emitidos podem ser contabilizados automaticamente com partidas equilibradas. A operação exige configuração de contas.</p><div id="fiscalPostMsg"></div><div style="overflow:auto"><table class="table"><tr><th>Número</th><th>Tipo</th><th>Data</th><th>Total</th><th>Estado</th><th>Ação</th></tr>'+
+ dd.map(d=>'<tr><td>'+esc(d.numero)+'</td><td>'+esc(d.tipo)+'</td><td>'+esc(d.data_emissao)+'</td><td>'+Number(d.total||0).toFixed(2)+' AOA</td><td>'+esc(d.estado)+'</td><td>'+((canManage&&["emitido","pago","parcial","vencido"].includes(d.estado))?'<button class="secondary" data-post="'+esc(d.id)+'">Contabilizar</button>':'—')+'</td></tr>').join("")+
+ '</table></div></div>'+
+ '<div class="card" style="margin-top:16px"><h2>📊 Períodos e fecho</h2><div style="overflow:auto"><table class="table"><tr><th>Período</th><th>Estado</th><th>Fechado em</th><th>Ação</th></tr>'+
+ pp.map(p=>'<tr><td>'+esc(p.mes+'/'+p.ano)+'</td><td>'+esc(p.estado)+'</td><td>'+esc(p.fechado_em||"—")+'</td><td>'+((canManage&&p.estado==="aberto")?'<button class="secondary" data-close-period="'+esc(p.id)+'">Fechar período</button>':'—')+'</td></tr>').join("")+
+ '</table></div></div>'+
+ '<div class="card" style="margin-top:16px"><h2>📘 Diário contabilístico</h2><div style="overflow:auto"><table class="table"><tr><th>Data</th><th>Diário</th><th>Descrição</th><th>Origem</th><th>Débito</th><th>Crédito</th><th>Estado</th></tr>'+
+ ll.map(x=>'<tr><td>'+esc(x.data_lancamento)+'</td><td>'+esc(x.diario)+'</td><td>'+esc(x.descricao)+'</td><td>'+esc(x.origem_tipo||"manual")+'</td><td>'+Number(debMap[x.id]||0).toFixed(2)+'</td><td>'+Number(credMap[x.id]||0).toFixed(2)+'</td><td>'+esc(x.estado)+'</td></tr>').join("")+
+ '</table></div></div>'+
+ '<div class="card" style="margin-top:16px"><h2>📒 Plano de contas actual</h2><div style="overflow:auto"><table class="table"><tr><th>Código</th><th>Nome</th><th>Classe</th><th>Tipo</th><th>Analítica</th><th>Estado</th></tr>'+
+ cc.map(x=>'<tr><td>'+esc(x.codigo)+'</td><td>'+esc(x.nome)+'</td><td>'+esc(x.classe??"")+'</td><td>'+esc(x.tipo)+'</td><td>'+esc(x.analitica?"Sim":"Não")+'</td><td>'+esc(x.ativa?"Activa":"Inactiva")+'</td></tr>').join("")+
+ '</table></div></div>'
+ );
+ if(canManage){
+   if(cfg){
+     if(mpClientes)mpClientes.value=cfg.conta_clientes_id||"";
+     if(mpReceita)mpReceita.value=cfg.conta_receita_id||"";
+     if(mpIva)mpIva.value=cfg.conta_iva_liquidado_id||"";
+     if(mpCaixa)mpCaixa.value=cfg.conta_caixa_id||"";
+     if(mpBanco)mpBanco.value=cfg.conta_banco_id||"";
+     if(mpAdv)mpAdv.value=cfg.conta_advertencias_id||"";
+   }
+   ctForm.onsubmit=async e=>{
+     e.preventDefault();ctMsg.innerHTML='<div class="warn">A gravar conta…</div>';
+     const payload={instituicao_id:me.instituicao_id,codigo:ctCodigo.value.trim(),nome:ctNome.value.trim(),classe:ctClasse.value?Number(ctClasse.value):null,tipo:ctTipo.value,conta_pai_id:ctPai.value||null,analitica:ctAnalitica.value==="true",ativa:true};
+     const {data,error}=await db.from("plano_contas_contabil").insert(payload).select("id").single();
+     if(error){ctMsg.innerHTML='<div class="error">'+esc(error.message)+'</div>';return}
+     const {data:v}=await db.from("plano_contas_contabil").select("id,codigo,nome").eq("id",data.id).eq("instituicao_id",me.instituicao_id).maybeSingle();
+     ctMsg.innerHTML=v?'<div class="ok">Conta criada e verificada no Supabase.</div>':'<div class="error">Conta criada mas a verificação falhou.</div>';await contabilidade();
+   };
+   mapForm.onsubmit=async e=>{
+     e.preventDefault();mapMsg.innerHTML='<div class="warn">A guardar mapeamento…</div>';
+     const payload={instituicao_id:me.instituicao_id,conta_clientes_id:mpClientes.value||null,conta_receita_id:mpReceita.value||null,conta_iva_liquidado_id:mpIva.value||null,conta_caixa_id:mpCaixa.value||null,conta_banco_id:mpBanco.value||null,conta_advertencias_id:mpAdv.value||null,ativo:true,updated_at:new Date().toISOString()};
+     const q=cfg?.id?db.from("config_contabil_fiscal").update(payload).eq("id",cfg.id).eq("instituicao_id",me.instituicao_id):db.from("config_contabil_fiscal").insert(payload).select("id").single();
+     const {data,error}=await q;
+     if(error){mapMsg.innerHTML='<div class="error">'+esc(error.message)+'</div>';return}
+     const {data:v}=await db.from("config_contabil_fiscal").select("id,conta_clientes_id,conta_receita_id,conta_iva_liquidado_id,conta_caixa_id,conta_banco_id").eq("instituicao_id",me.instituicao_id).maybeSingle();
+     mapMsg.innerHTML=v?'<div class="ok">Mapeamento guardado e verificado no Supabase.</div>':'<div class="error">Não foi possível verificar o mapeamento.</div>';await contabilidade();
+   };
+   perForm.onsubmit=async e=>{
+     e.preventDefault();perMsg.innerHTML='<div class="warn">A abrir período…</div>';
+     const {data,error}=await db.from("periodos_contabeis").insert({instituicao_id:me.instituicao_id,ano:Number(perAno.value),mes:Number(perMes.value),estado:"aberto"}).select("id").single();
+     if(error){perMsg.innerHTML='<div class="error">'+esc(error.message)+'</div>';return}
+     const {data:v}=await db.from("periodos_contabeis").select("id,estado").eq("id",data.id).maybeSingle();
+     perMsg.innerHTML=v?'<div class="ok">Período criado e verificado no Supabase.</div>':'<div class="error">Período criado mas não foi possível verificar.</div>';await contabilidade();
+   };
+   document.querySelectorAll("[data-post]").forEach(b=>b.onclick=async()=>{
+     fiscalPostMsg.innerHTML='<div class="warn">A contabilizar documento…</div>';
+     const {data,error}=await db.rpc("contabilizar_documento_fiscal",{p_documento_id:b.dataset.post});
+     if(error){fiscalPostMsg.innerHTML='<div class="error">'+esc(error.message)+'</div>';return}
+     const {data:v}=await db.from("lancamentos_contabeis").select("id,estado").eq("id",data).eq("instituicao_id",me.instituicao_id).maybeSingle();
+     if(!v){fiscalPostMsg.innerHTML='<div class="error">Lançamento criado mas a verificação falhou.</div>';return}
+     const {data:lin}=await db.from("lancamento_linhas_contabeis").select("debito,credito").eq("lancamento_id",data);
+     const td=(lin||[]).reduce((s,x)=>s+Number(x.debito||0),0),tc=(lin||[]).reduce((s,x)=>s+Number(x.credito||0),0);
+     fiscalPostMsg.innerHTML=Math.round(td*100)===Math.round(tc*100)?'<div class="ok">Documento contabilizado. Débito = Crédito = '+td.toFixed(2)+' e verificado no Supabase.</div>':'<div class="error">Lançamento desequilibrado após gravação.</div>';
+     await contabilidade();
+   });
+   document.querySelectorAll("[data-close-period]").forEach(b=>b.onclick=async()=>{
+     if(!confirm("Fechar este período? Depois do fecho, novas operações devem ser feitas no período seguinte."))return;
+     perMsg.innerHTML='<div class="warn">A validar e fechar período…</div>';
+     const {data,error}=await db.rpc("nova_fechar_periodo_contabil",{p_periodo_id:b.dataset.closePeriod});
+     if(error){perMsg.innerHTML='<div class="error">'+esc(error.message)+'</div>';return}
+     const {data:v}=await db.from("periodos_contabeis").select("id,estado,fechado_em").eq("id",b.dataset.closePeriod).maybeSingle();
+     perMsg.innerHTML=v?.estado==="fechado"?'<div class="ok">Período fechado e verificado no Supabase.</div>':'<div class="error">O fecho não pôde ser verificado.</div>';await contabilidade();
+   });
+ }
+}
+
 async function fiscal(){
  if(!school()){shell('<div class="warn">Associe este perfil a uma escola para gerir a faturação.</div>');return}
  const canEmit=admin()||["school_admin","accountant","principal","reception"].includes(me.role);
@@ -514,7 +613,7 @@ if(view==="suporte"){await list("Suporte","plataforma_suporte");return}
 if(view==="assinaturas"&&admin()){await assinaturas();return}
 if(view==="instituicao"){shell('<div class="card"><h1>Instituição</h1><p class="muted">'+(school()?"Tenant associado ao perfil.":"Super Admin: pode gerir múltiplas instituições.")+'</p><div class="'+(school()?"ok":"warn")+'">'+(school()?"Instituição configurada.":"Nenhuma instituição associada a este perfil.")+'</div></div>');return}
 if(view==="nova"){shell('<div class="hero"><h1>NOVA AI</h1><p>Assistente escolar por tenant, com identidade do utilizador e autenticação JWT.</p></div><div class="card"><p>Utilizador: <b>'+esc(me.nome_completo)+'</b></p><p class="muted">A IA deve respeitar a instituição do perfil e nunca misturar dados entre escolas.</p></div>');return}
-if(view==="alunos"){await coreCrud("alunos");return}if(view==="professores"){await coreCrud("professores");return}if(view==="academico"){await coreCrud("turmas");return}if(view==="anos-letivos"){await academicYears();return}if(view==="matriculas"){await matriculas();return}if(view==="presencas"){await presencas();return}if(view==="avaliacoes"){await avaliacoes();return}if(view==="progresso"){await progresso();return}if(view==="financeiro"){await financeiro();return}if(view==="fiscal"){await fiscal();return}const map={comunicacao:["Comunicação","comunicados"],encarregados:["Encarregados de Educação","encarregados"],admissoes:["Admissões","candidatos_admissao"],documentos:["Documentos","documentos_escolares"]};const z=map[view];if(z)return list(z[0],z[1]);}
+if(view==="alunos"){await coreCrud("alunos");return}if(view==="professores"){await coreCrud("professores");return}if(view==="academico"){await coreCrud("turmas");return}if(view==="anos-letivos"){await academicYears();return}if(view==="matriculas"){await matriculas();return}if(view==="presencas"){await presencas();return}if(view==="avaliacoes"){await avaliacoes();return}if(view==="progresso"){await progresso();return}if(view==="financeiro"){await financeiro();return}if(view==="contabilidade"){await contabilidade();return}if(view==="fiscal"){await fiscal();return}const map={comunicacao:["Comunicação","comunicados"],encarregados:["Encarregados de Educação","encarregados"],admissoes:["Admissões","candidatos_admissao"],documentos:["Documentos","documentos_escolares"]};const z=map[view];if(z)return list(z[0],z[1]);}
 db.auth.onAuthStateChange(e=>{if(e==="SIGNED_OUT"){me=null;login()}});(async()=>{const{data:{session}}=await db.auth.getSession();session?load():login()})();
 }
 window.addEventListener("nova:supabase-ready",initNovaApp);
