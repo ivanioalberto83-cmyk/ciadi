@@ -436,7 +436,8 @@ async function financeiro(){
    db.from("v_relatorio_pagamentos_escolares").select("*").eq("instituicao_id",me.instituicao_id).order("data_pagamento",{ascending:false})
   ]);
   if(chargesRes.error||payRes.error){shell('<div class="error">'+esc(chargesRes.error?.message||payRes.error?.message)+'</div>');return}
-  const charges=chargesRes.data||[], pays=payRes.data||[];\n  const alunoName=Object.fromEntries((r.alunos||[]).map(x=>[x.id,(x.numero_aluno?x.numero_aluno+" · ":"")+x.nome_completo]));
+  const charges=chargesRes.data||[], pays=payRes.data||[];
+  const alunoName=Object.fromEntries((r.alunos||[]).map(x=>[x.id,(x.numero_aluno?x.numero_aluno+" · ":"")+x.nome_completo]));
   const total=charges.reduce((s,x)=>s+Number(x.valor||0),0), paid=charges.reduce((s,x)=>s+Number(x.valor_pago||0),0), balance=total-paid;
   shell('<div class="hero"><h1>💰 Financeiro Escolar</h1><p>Fluxo controlado: Aluno/Responsável → Cobrança → Pagamento → Saldo → Documento fiscal. As operações financeiras são registadas no banco e verificadas imediatamente.</p></div>'+
    '<div class="grid"><div class="card stat"><strong>'+esc(charges.length)+'</strong><span>Cobranças</span></div><div class="card stat"><strong>'+esc(total.toFixed(2))+' AOA</strong><span>Total cobrado</span></div><div class="card stat"><strong>'+esc(paid.toFixed(2))+' AOA</strong><span>Total recebido</span></div><div class="card stat"><strong>'+esc(balance.toFixed(2))+' AOA</strong><span>Saldo em aberto</span></div></div>'+
