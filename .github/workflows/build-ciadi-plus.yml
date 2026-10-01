@@ -38,6 +38,25 @@ jobs:
           test -f ciadi-plus/settings.gradle.kts
           test -f ciadi-plus/app/build.gradle.kts
 
+      - name: Audit Clínica Virtual source
+        working-directory: ciadi-plus
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo "=== FILES WITH CLINICA/VIRTUAL/CONSULTA ONLINE ==="
+            grep -RniE 'Clínica Virtual|Clinica Virtual|Consulta Online|Teleconsulta|sala.html|agendamento' app/src/main --include='*.kt' --include='*.xml' || true
+            echo "=== MANIFEST ==="
+            sed -n '1,240p' app/src/main/AndroidManifest.xml || true
+          } > ../clinic-source-audit.txt
+      - name: Upload Clínica Virtual source audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: clinic-source-audit
+          path: clinic-source-audit.txt
+          if-no-files-found: error
+          retention-days: 3
+
       - name: Audit authentication source
         working-directory: ciadi-plus
         shell: bash
