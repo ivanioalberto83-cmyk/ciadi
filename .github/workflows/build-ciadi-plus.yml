@@ -53,7 +53,7 @@ jobs:
           cp app/src/main/java/com/example/ui/screens/virtualclinic/ClinicaVirtualScreen.kt ../clinic-source-files/ 2>/dev/null || true
           cp app/src/main/java/com/example/ui/screens/virtualclinic/SalaVideoScreen.kt ../clinic-source-files/ 2>/dev/null || true
           cp app/src/main/java/com/example/ui/screens/dashboard/MainDashboardScreen.kt ../clinic-source-files/ 2>/dev/null || true
-          cp app/src/main/java/com/example/MainActivity.kt ../clinic-source-files/ 2>/dev/null || true\n          cp app/src/main/java/com/example/ui/navigation/AppNavigation.kt ../clinic-source-files/ 2>/dev/null || true
+          cp app/src/main/java/com/example/MainActivity.kt ../clinic-source-files/ 2>/dev/null || true\n          cp app/src/main/java/com/example/ui/navigation/AppNavigation.kt ../clinic-source-files/ 2>/dev/null || true\n          cp app/src/main/java/com/example/core/session/SessionManager.kt ../clinic-source-files/ 2>/dev/null || true\n          cp app/src/main/java/com/example/data/repository/SupabaseAuthRepositoryImpl.kt ../clinic-source-files/ 2>/dev/null || true
       - name: Upload Clínica Virtual source audit
         uses: actions/upload-artifact@v4
         with:
