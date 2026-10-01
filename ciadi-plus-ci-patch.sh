@@ -2,7 +2,7 @@
 set -euo pipefail
 
 APP_DIR="ciadi-plus-src"
-ZIP="ciadi+.zip"
+ZIP="ciadi+ (1).zip"
 rm -rf "$APP_DIR"
 mkdir -p "$APP_DIR"
 unzip -q "$ZIP" -d "$APP_DIR"
