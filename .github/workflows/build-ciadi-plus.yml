@@ -49,12 +49,25 @@ jobs:
             echo "=== MANIFEST ==="
             sed -n '1,240p' app/src/main/AndroidManifest.xml || true
           } > ../clinic-source-audit.txt
+          mkdir -p ../clinic-source-files
+          cp app/src/main/java/com/example/ui/screens/virtualclinic/ClinicaVirtualScreen.kt ../clinic-source-files/ 2>/dev/null || true
+          cp app/src/main/java/com/example/ui/screens/virtualclinic/SalaVideoScreen.kt ../clinic-source-files/ 2>/dev/null || true
+          cp app/src/main/java/com/example/ui/screens/dashboard/MainDashboardScreen.kt ../clinic-source-files/ 2>/dev/null || true
+          cp app/src/main/java/com/example/MainActivity.kt ../clinic-source-files/ 2>/dev/null || true
       - name: Upload Clínica Virtual source audit
         uses: actions/upload-artifact@v4
         with:
           name: clinic-source-audit
           path: clinic-source-audit.txt
           if-no-files-found: error
+          retention-days: 3
+
+      - name: Upload Clínica Virtual source files
+        uses: actions/upload-artifact@v4
+        with:
+          name: clinic-source-files
+          path: clinic-source-files
+          if-no-files-found: warn
           retention-days: 3
 
       - name: Audit authentication source
