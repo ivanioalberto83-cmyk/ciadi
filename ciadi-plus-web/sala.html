@@ -17,7 +17,7 @@
 </div></div>
 <script>
 const SUPABASE_URL='https://egpkkttbcaukqnnxyhjv.supabase.co',SUPABASE_KEY='sb_publishable_SSA6B6gfnaUxKhOzReE6HQ_utqQRebz';
-const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:'ciadi-plus-auth'}});
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:'sb-egpkkttbcaukqnnxyhjv-auth'}});
 let room=null,roomInfo=null,reconnectTimer=null,reconnectAttempts=0,manualLeave=false;
 const MAX_RECONNECT_ATTEMPTS=5,id=new URLSearchParams(location.search).get('agendamento_id')||new URLSearchParams(location.search).get('agendamento'),$=x=>document.getElementById(x);
 function setState(t){$('state').textContent=t}
@@ -30,7 +30,13 @@ async function getRoomToken(){
  const r=await fetch(SUPABASE_URL+'/functions/v1/ciadi-video-token',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token,'apikey':SUPABASE_KEY},body:JSON.stringify({agendamento_id:id})});
  const j=await r.json().catch(()=>({})); if(!r.ok||!j.success)throw new Error(j.error||'Não foi possível autorizar a sala.'); return j;
 }
-async function prepare(){try{if(!id)throw new Error('Agendamento não informado.');const {data:{session}}=await sb.auth.getSession();if(!session?.access_token)throw new Error('Sessão CIADI+ não encontrada. Faça login novamente.');const a=await sb.from('agendamentos').select('id,data_hora,duracao_minutos,tipo,modalidade,estado,profissionais(nome_completo),especialidades(nome)').eq('id',id).single();if(a.error)throw a.error;$('specialty').textContent=a.data.especialidades?.nome||'Consulta CIADI';$('professional').textContent=a.data.profissionais?.nome_completo||'Profissional CIADI';$('date').textContent=a.data.data_hora?new Date(a.data.data_hora).toLocaleString('pt-AO'):'';roomInfo=await getRoomToken();setState('Pronta');$('joinBtn').disabled=false}catch(e){showError(e)}}
+async function prepare(){try{if(!id)throw new Error('Agendamento não informado.');const {data:{session}}=await sb.auth.getSession();if(!session?.access_token)throw new Error('Sessão CIADI+ não encontrada. Faça login novamente.');const a=await sb.from('agendamentos').select('id,data_hora,duracao_minutos,tipo,modalidade,estado,profissionais(nome_completo),especialidades(nome)').eq('id',id).single();
+if(a.data){
+ const modalidade=String(a.data.modalidade||a.data.tipo||'').toLowerCase();
+ if(!['online','video','virtual'].includes(modalidade)) throw new Error('Este agendamento não é uma consulta online.');
+ const estado=String(a.data.estado||'').toLowerCase();
+ if(['cancelada','cancelado','concluida','concluído','concluída','faltou'].includes(estado)) throw new Error('Esta consulta não está disponível.');
+}if(a.error)throw a.error;$('specialty').textContent=a.data.especialidades?.nome||'Consulta CIADI';$('professional').textContent=a.data.profissionais?.nome_completo||'Profissional CIADI';$('date').textContent=a.data.data_hora?new Date(a.data.data_hora).toLocaleString('pt-AO'):'';roomInfo=await getRoomToken();setState('Pronta');$('joinBtn').disabled=false}catch(e){showError(e)}}
 function attachEvents(){
  room.on(LivekitClient.RoomEvent.TrackSubscribed,t=>{const el=t.attach();el.style.maxWidth='100%';el.style.maxHeight='100%';$('video').appendChild(el)});
  room.on(LivekitClient.RoomEvent.TrackUnsubscribed,t=>t.detach().forEach(el=>el.remove()));
