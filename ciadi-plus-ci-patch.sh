@@ -213,4 +213,120 @@ cat > app/src/main/res/values/colors.xml <<'XML'
 </resources>
 XML
 
+# Clínica Virtual: o APK não duplica a sala de vídeo. Ao entrar, abre a sala Web oficial
+# com a sessão Supabase nativa entregue no fragmento (não enviado ao servidor HTTP).
+python3 - <<'PY'
+from pathlib import Path
+p=Path('app/src/main/java/com/example/ui/screens/virtualclinic/SalaVideoScreen.kt')
+p.write_text(r'''package com.example.ui.screens.virtualclinic
+
+import android.Manifest
+import android.annotation.SuppressLint
+import android.content.pm.PackageManager
+import android.webkit.PermissionRequest
+import android.webkit.WebChromeClient
+import android.webkit.WebSettings
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat
+import com.example.core.session.SessionManager
+import com.example.data.remote.dto.PortalAgendamentoDto
+import com.example.domain.model.UserProfile
+import com.example.domain.repository.ModulesRepository
+import java.net.URLEncoder
+
+@SuppressLint("SetJavaScriptEnabled")
+@Composable
+fun SalaVideoScreen(
+    user: UserProfile,
+    agendamento: PortalAgendamentoDto,
+    onNavigateBack: () -> Unit,
+    modulesRepository: ModulesRepository?,
+    modifier: Modifier = Modifier
+) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val sessionManager = remember { SessionManager(context.applicationContext) }
+
+    val accessToken = remember { sessionManager.getCurrentAccessToken().orEmpty() }
+    val refreshToken = remember { sessionManager.getCurrentRefreshToken().orEmpty() }
+
+    val url = remember(agendamento.id, accessToken, refreshToken) {
+        val base = "https://www.ciadi.ao/sala.html?agendamento_id=" +
+            URLEncoder.encode(agendamento.id, "UTF-8")
+        if (accessToken.isBlank() || refreshToken.isBlank()) {
+            base
+        } else {
+            base + "#access_token=" + URLEncoder.encode(accessToken, "UTF-8") +
+                "&refresh_token=" + URLEncoder.encode(refreshToken, "UTF-8") +
+                "&native=1"
+        }
+    }
+
+    val webView = remember {
+        WebView(context).apply {
+            settings.javaScriptEnabled = true
+            settings.domStorageEnabled = true
+            settings.mediaPlaybackRequiresUserGesture = false
+            settings.cacheMode = WebSettings.LOAD_DEFAULT
+            settings.allowFileAccess = false
+            settings.allowContentAccess = false
+            webViewClient = WebViewClient()
+            webChromeClient = object : WebChromeClient() {
+                override fun onPermissionRequest(request: PermissionRequest) {
+                    val camera = ContextCompat.checkSelfPermission(
+                        context, Manifest.permission.CAMERA
+                    ) == PackageManager.PERMISSION_GRANTED
+                    val mic = ContextCompat.checkSelfPermission(
+                        context, Manifest.permission.RECORD_AUDIO
+                    ) == PackageManager.PERMISSION_GRANTED
+                    if (camera && mic) {
+                        request.grant(request.resources)
+                    } else {
+                        request.deny()
+                    }
+                }
+            }
+        }
+    }
+
+    DisposableEffect(webView) {
+        onDispose {
+            webView.stopLoading()
+            webView.destroy()
+        }
+    }
+
+    BackHandler {
+        if (webView.canGoBack()) webView.goBack() else onNavigateBack()
+    }
+
+    AndroidView(
+        modifier = modifier.fillMaxSize(),
+        factory = { webView },
+        update = { view ->
+            if (view.url != url) view.loadUrl(url)
+        }
+    )
+}
+''')
+
+manifest=Path('app/src/main/AndroidManifest.xml')
+m=manifest.read_text()
+for perm in [
+    '<uses-permission android:name="android.permission.CAMERA" />',
+    '<uses-permission android:name="android.permission.RECORD_AUDIO" />'
+]:
+    if perm not in m:
+        m=m.replace('    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />',
+                    '    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />\n    '+perm)
+manifest.write_text(m)
+PY
+
 # APK build uses the icon already present in the CIADI+ source ZIP.
