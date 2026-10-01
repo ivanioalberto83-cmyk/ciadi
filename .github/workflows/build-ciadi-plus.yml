@@ -81,6 +81,33 @@ jobs:
           echo "=== AUTH REFERENCES ==="
           grep -RniE 'Bearer|Authorization|supabase|signInWith|signInWithPassword|access_token|publishable|anon' app/src/main --include='*.kt' --include='*.java' --include='*.xml' | head -250 || true
 
+      - name: Route native CIADI+ video room to new Web Clinic
+        working-directory: ciadi-plus
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          replacements = {
+              'https://www.ciadi.ao/sala.html': 'https://www.ciadi.ao/clinica-virtual/index.html',
+              'https://www.ciadi.ao/ciadi-plus-web/sala.html': 'https://www.ciadi.ao/clinica-virtual/index.html',
+              './sala.html': './clinica-virtual/index.html',
+              '../sala.html': '../clinica-virtual/index.html',
+          }
+          changed = 0
+          for p in Path('app/src/main').rglob('*'):
+              if not p.is_file() or p.suffix not in {'.kt','.java','.xml'}:
+                  continue
+              try: s=p.read_text()
+              except UnicodeDecodeError: continue
+              ns=s
+              for a,b in replacements.items(): ns=ns.replace(a,b)
+              if ns != s:
+                  p.write_text(ns)
+                  changed += 1
+                  print('patched',p)
+          print('native room route files:',changed)
+          PY
       - name: Normalize Android package
         working-directory: ciadi-plus
         shell: bash
