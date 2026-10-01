@@ -200,21 +200,4 @@ cat > app/src/main/res/values/colors.xml <<'XML'
 </resources>
 XML
 
-cat > ciadi_icon.svg <<'SVG'
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108">
-  <rect width="108" height="108" rx="22" fill="#6F351F"/>
-  <circle cx="54" cy="54" r="34" fill="#F58200"/>
-  <circle cx="54" cy="54" r="24" fill="#FFDF19"/>
-  <path d="M51 27h6v54h-6zM27 51h54v6h-54z" fill="#6F351F"/>
-  <circle cx="54" cy="45" r="9" fill="#fff"/>
-  <path d="M41 59c-4 4-6 9-6 15h38c0-6-2-11-6-15-3 4-7 6-13 6s-10-2-13-6z" fill="#fff"/>
-</svg>
-SVG
-
-for spec in "mdpi:48" "hdpi:72" "xhdpi:96" "xxhdpi:144" "xxxhdpi:192"; do
-  density="${spec%%:*}"
-  size="${spec##*:}"
-  mkdir -p "app/src/main/res/mipmap-${density}"
-  convert -background none ciadi_icon.svg -resize "${size}x${size}" "app/src/main/res/mipmap-${density}/ic_launcher.png"
-  cp "app/src/main/res/mipmap-${density}/ic_launcher.png" "app/src/main/res/mipmap-${density}/ic_launcher_round.png"
-done
+# APK build uses the icon already present in the CIADI+ source ZIP.
