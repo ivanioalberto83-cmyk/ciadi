@@ -20,6 +20,15 @@ const SUPABASE_URL='https://egpkkttbcaukqnnxyhjv.supabase.co',SUPABASE_KEY='sb_p
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:'sb-egpkkttbcaukqnnxyhjv-auth'}});
 let room=null,roomInfo=null,reconnectTimer=null,reconnectAttempts=0,manualLeave=false;
 const MAX_RECONNECT_ATTEMPTS=5,id=new URLSearchParams(location.search).get('agendamento_id')||new URLSearchParams(location.search).get('agendamento'),$=x=>document.getElementById(x);
+async function hydrateNativeSession(){
+ const h=new URLSearchParams(location.hash.replace(/^#/,''));
+ const access=h.get('access_token'),refresh=h.get('refresh_token');
+ if(!access||!refresh)return false;
+ const {error}=await sb.auth.setSession({access_token:access,refresh_token:refresh});
+ history.replaceState(null,document.title,location.pathname+'?agendamento_id='+encodeURIComponent(id));
+ if(error)throw error;
+ return true;
+}
 function setState(t){$('state').textContent=t}
 function showError(e){$('error').style.display='block';$('error').textContent=e?.message||String(e);setState('Erro')}
 function showNotice(t){$('notice').style.display='block';$('notice').textContent=t}
@@ -51,5 +60,5 @@ async function joinRoom(){try{manualLeave=false;reconnectAttempts=0;hideNotice()
 async function toggleMic(){if(room?.state===LivekitClient.ConnectionState.Connected)await room.localParticipant.setMicrophoneEnabled(!room.localParticipant.isMicrophoneEnabled)}
 async function toggleCam(){if(room?.state===LivekitClient.ConnectionState.Connected)await room.localParticipant.setCameraEnabled(!room.localParticipant.isCameraEnabled)}
 async function leaveRoom(){manualLeave=true;if(reconnectTimer){clearTimeout(reconnectTimer);reconnectTimer=null}if(room)await room.disconnect();location.reload()}
-prepare();
+hydrateNativeSession().catch(()=>false).then(()=>prepare());
 </script></body></html>
