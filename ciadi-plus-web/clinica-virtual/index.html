@@ -17,6 +17,32 @@
 .panel{position:fixed;top:70px;right:0;width:min(390px,92vw);height:calc(100vh - 70px);background:#fff;border-left:1px solid var(--line);box-shadow:-15px 0 40px #13222b18;z-index:20;padding:18px;overflow:auto;transform:translateX(105%);transition:transform .22s ease}.panel.open{transform:none}.panelHead{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}.panelHead h3{margin:0;color:var(--brown)}.close{border:1px solid var(--line);background:#fff;border-radius:10px;width:36px;height:36px}.panelRow{padding:12px;border:1px solid var(--line);border-radius:12px;margin-bottom:9px}.panelRow b{display:block;font-size:12px}.panelRow span{font-size:11px;color:var(--mut)}
 @media(max-width:1050px){.main{grid-template-columns:1fr}.sidebar{display:none}.stage{height:calc(100vh - 104px);min-height:560px}.workspace{padding:10px}.topbar{padding:0 13px}.consultation{display:none}}
 @media(max-width:620px){.topbar{height:62px}.brand small{display:none}.status{padding:7px 9px}.workspace{padding:7px}.stage{height:calc(100vh - 76px);min-height:500px;border-radius:17px}.local{width:125px;right:10px;top:10px;border-radius:12px}.timer{left:10px;top:10px}.quality{left:10px;bottom:75px}.controls{bottom:9px;padding:7px;gap:5px}.control{width:41px;height:42px;border-radius:11px;font-size:15px}.control.end{width:48px}.panel{top:62px;height:calc(100vh - 62px)}}
+/* CIADI+ Premium Room */
+body{background:linear-gradient(135deg,#f6f8fa 0%,#eef2f4 100%);letter-spacing:-.01em}
+.topbar{height:76px;padding:0 26px;background:rgba(255,255,255,.94);backdrop-filter:blur(18px);box-shadow:0 1px 0 rgba(21,38,49,.04)}
+.logo{position:relative;width:42px;height:42px;border-radius:14px;box-shadow:0 9px 24px rgba(245,130,0,.24)}
+.logo:after{content:"";position:absolute;inset:-4px;border-radius:17px;border:1px solid rgba(245,130,0,.12)}
+.brand strong{font-size:15px;letter-spacing:.01em}.brand small{font-size:10px;letter-spacing:.03em}
+.status{background:#f4faf7;border:1px solid #d9eee5;box-shadow:0 5px 18px rgba(26,155,108,.07)}
+.main{grid-template-columns:minmax(0,1fr) 370px}
+.workspace{padding:20px 20px 20px 22px}
+.stage{border-radius:26px;box-shadow:0 24px 65px rgba(16,24,30,.20);border:1px solid rgba(255,255,255,.08)}
+.remote:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.12),transparent 28%,transparent 70%,rgba(0,0,0,.26));pointer-events:none;z-index:1}
+.empty{position:relative;z-index:2}.empty .icon{box-shadow:0 18px 40px rgba(0,0,0,.2);backdrop-filter:blur(10px)}
+.local{width:245px;aspect-ratio:16/10;border-radius:18px;border:2px solid rgba(255,255,255,.7);box-shadow:0 18px 40px rgba(0,0,0,.38);z-index:3}
+.timer,.quality{z-index:3;backdrop-filter:blur(12px)}
+.controls{z-index:4;padding:10px 11px;border-radius:20px;gap:8px;background:rgba(8,14,18,.82);box-shadow:0 20px 50px rgba(0,0,0,.42)}
+.control{width:50px;height:48px;border-radius:14px;transition:transform .16s ease,background .16s ease,box-shadow .16s ease}.control:hover{transform:translateY(-2px)}
+.control.active{box-shadow:0 0 0 3px rgba(255,255,255,.13)}
+.control.end{width:58px;box-shadow:0 7px 18px rgba(217,47,56,.35)}
+.sidebar{padding:20px 20px 20px 0;background:transparent;border-left:0}
+.card{border-radius:20px;padding:17px;background:rgba(255,255,255,.92);box-shadow:0 10px 30px rgba(21,38,49,.055);border-color:#e7ecef}
+.card h3{font-size:13px;letter-spacing:.01em}.item{background:#fbfcfd}
+.btn.primary{box-shadow:0 8px 18px rgba(245,130,0,.20);transition:transform .15s ease,box-shadow .15s ease}.btn.primary:hover{transform:translateY(-1px);box-shadow:0 11px 22px rgba(245,130,0,.25)}
+.action{transition:transform .15s ease,border-color .15s ease,background .15s ease}.action:hover{transform:translateY(-1px)}
+.panel{top:76px;height:calc(100vh - 76px);border-radius:22px 0 0 0}
+@media(max-width:1050px){.sidebar{display:none}.workspace{padding:12px}.stage{border-radius:20px}}
+@media(max-width:620px){.topbar{height:64px;padding:0 12px}.workspace{padding:7px}.stage{border-radius:17px}.panel{top:64px;height:calc(100vh - 64px)}.local{width:135px}}
 </style>
 </head>
 <body>
