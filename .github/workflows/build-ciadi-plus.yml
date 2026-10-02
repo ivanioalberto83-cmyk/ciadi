@@ -18,22 +18,14 @@ jobs:
           set -euo pipefail
           rm -rf ciadi-plus
           unzip -q 'ciadi+ (1).zip' -d ciadi-plus
-          echo "=== EXTRAÍDO ==="
-          find ciadi-plus -maxdepth 3 -type f | head -100
           if [ ! -f ciadi-plus/settings.gradle.kts ]; then
-            echo "settings.gradle.kts não encontrado na raiz; procurando o projeto Android..."
             SETTINGS=$(find ciadi-plus -name settings.gradle.kts -print -quit)
-            if [ -z "$SETTINGS" ]; then
-              echo "ERRO: projeto Android Gradle não encontrado no ZIP."
-              exit 1
-            fi
+            test -n "$SETTINGS"
             PROJECT_DIR=$(dirname "$SETTINGS")
-            if [ "$PROJECT_DIR" != "ciadi-plus" ]; then
-              mkdir -p ciadi-plus-source
-              cp -a "$PROJECT_DIR"/. ciadi-plus-source/
-              rm -rf ciadi-plus
-              mv ciadi-plus-source ciadi-plus
-            fi
+            mkdir -p ciadi-plus-source
+            cp -a "$PROJECT_DIR"/. ciadi-plus-source/
+            rm -rf ciadi-plus
+            mv ciadi-plus-source ciadi-plus
           fi
           test -f ciadi-plus/settings.gradle.kts
           test -f ciadi-plus/app/build.gradle.kts
@@ -42,7 +34,7 @@ jobs:
         working-directory: ciadi-plus
         shell: bash
         run: |
-          set -euo pipefail
+          set -u
           {
             echo "=== FILES WITH CLINICA/VIRTUAL/CONSULTA ONLINE ==="
             grep -RniE 'Clínica Virtual|Clinica Virtual|Consulta Online|Teleconsulta|sala.html|agendamento' app/src/main --include='*.kt' --include='*.xml' || true
@@ -53,8 +45,13 @@ jobs:
           cp app/src/main/java/com/example/ui/screens/virtualclinic/ClinicaVirtualScreen.kt ../clinic-source-files/ 2>/dev/null || true
           cp app/src/main/java/com/example/ui/screens/virtualclinic/SalaVideoScreen.kt ../clinic-source-files/ 2>/dev/null || true
           cp app/src/main/java/com/example/ui/screens/dashboard/MainDashboardScreen.kt ../clinic-source-files/ 2>/dev/null || true
-          cp app/src/main/java/com/example/MainActivity.kt ../clinic-source-files/ 2>/dev/null || true\n          cp app/src/main/java/com/example/ui/navigation/AppNavigation.kt ../clinic-source-files/ 2>/dev/null || true\n          cp app/src/main/java/com/example/core/session/SessionManager.kt ../clinic-source-files/ 2>/dev/null || true\n          cp app/src/main/java/com/example/data/repository/SupabaseAuthRepositoryImpl.kt ../clinic-source-files/ 2>/dev/null || true\n          find app/src/main -type f -iname '*session*manager*.kt' -print -exec cp {} ../clinic-source-files/ \\; 2>/dev/null || true
-          find app/src/main -type f -iname 'SupabaseAuthRepositoryImpl.kt' -print -exec cp {} ../clinic-source-files/ \\; 2>/dev/null || true
+          cp app/src/main/java/com/example/MainActivity.kt ../clinic-source-files/ 2>/dev/null || true
+          cp app/src/main/java/com/example/ui/navigation/AppNavigation.kt ../clinic-source-files/ 2>/dev/null || true
+          cp app/src/main/java/com/example/core/session/SessionManager.kt ../clinic-source-files/ 2>/dev/null || true
+          cp app/src/main/java/com/example/data/repository/SupabaseAuthRepositoryImpl.kt ../clinic-source-files/ 2>/dev/null || true
+          find app/src/main -type f -iname '*session*manager*.kt' -print -exec cp {} ../clinic-source-files/ \; 2>/dev/null || true
+          find app/src/main -type f -iname 'SupabaseAuthRepositoryImpl.kt' -print -exec cp {} ../clinic-source-files/ \; 2>/dev/null || true
+
       - name: Upload Clínica Virtual source audit
         uses: actions/upload-artifact@v4
         with:
@@ -98,16 +95,19 @@ jobs:
           for p in Path('app/src/main').rglob('*'):
               if not p.is_file() or p.suffix not in {'.kt','.java','.xml'}:
                   continue
-              try: s=p.read_text()
-              except UnicodeDecodeError: continue
-              ns=s
-              for a,b in replacements.items(): ns=ns.replace(a,b)
+              try:
+                  s = p.read_text()
+              except UnicodeDecodeError:
+                  continue
+              ns = s
+              for a,b in replacements.items():
+                  ns = ns.replace(a,b)
               if ns != s:
                   p.write_text(ns)
                   changed += 1
-                  print('patched',p)
-          print('native room route files:',changed)
+          print('native room route files:', changed)
           PY
+
       - name: Normalize Android package
         working-directory: ciadi-plus
         shell: bash
@@ -134,8 +134,10 @@ jobs:
               root.write_text(root_s)
           for p in Path("app/src").rglob("*"):
               if p.is_file() and p.suffix in {".kt", ".xml"}:
-                  try: t=p.read_text()
-                  except UnicodeDecodeError: continue
+                  try:
+                      t = p.read_text()
+                  except UnicodeDecodeError:
+                      continue
                   if "com.example" in t:
                       p.write_text(t.replace("com.example", "ao.ciadi.ciadi_plus"))
           PY
