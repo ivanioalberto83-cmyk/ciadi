@@ -21,27 +21,35 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "9.3.1"
-      - name: Extract and patch CIADI+ source
-        run: bash ciadi-plus-ci-patch.sh
-      - name: Upload extracted source for audit
-        uses: actions/upload-artifact@v4
-        with:
-          name: ciadi-plus-source-inspect
-          path: ciadi-plus-src
-          retention-days: 7
+      - name: Extract CIADI+ source
+        shell: bash
+        run: |
+          rm -rf ciadi-plus-src
+          mkdir -p ciadi-plus-src
+          unzip -q ciadi+.zip -d ciadi-plus-src
+          if [ ! -f ciadi-plus-src/gradlew ]; then
+            ROOT="$(find ciadi-plus-src -maxdepth 3 -name gradlew -type f | head -n 1 | xargs -r dirname)"
+            if [ -n "$ROOT" ] && [ "$ROOT" != "ciadi-plus-src" ]; then
+              shopt -s dotglob
+              mv "$ROOT"/* ciadi-plus-src/
+            fi
+          fi
+          chmod +x ciadi-plus-src/gradlew 2>/dev/null || true
+          test -f ciadi-plus-src/gradlew
       - name: Prepare build secrets
         working-directory: ciadi-plus-src
-        run: cp .env.example .env
+        run: |
+          if [ -f .env.example ]; then cp .env.example .env; fi
       - name: Run unit tests
         working-directory: ciadi-plus-src
-        run: gradle testDebugUnitTest --no-daemon
+        run: ./gradlew testDebugUnitTest --no-daemon
       - name: Build Debug APK
         working-directory: ciadi-plus-src
-        run: gradle assembleDebug --no-daemon
+        run: ./gradlew assembleDebug --no-daemon
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: ciadi-plus-debug-apk-v13
+          name: ciadi-plus-debug-apk-sos-bullying-at
           path: ciadi-plus-src/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
           retention-days: 14
