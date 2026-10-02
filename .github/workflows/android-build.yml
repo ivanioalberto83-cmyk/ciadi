@@ -13,14 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "17"
-          cache: gradle
-      - uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: "9.3.1"
+
       - name: Extract CIADI+ source
         shell: bash
         run: |
@@ -36,16 +29,29 @@ jobs:
           fi
           chmod +x ciadi-plus-src/gradlew 2>/dev/null || true
           test -f ciadi-plus-src/gradlew
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "9.3.1"
+
       - name: Prepare build secrets
         working-directory: ciadi-plus-src
         run: |
           if [ -f .env.example ]; then cp .env.example .env; fi
+
       - name: Run unit tests
         working-directory: ciadi-plus-src
         run: ./gradlew testDebugUnitTest --no-daemon
+
       - name: Build Debug APK
         working-directory: ciadi-plus-src
         run: ./gradlew assembleDebug --no-daemon
+
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
