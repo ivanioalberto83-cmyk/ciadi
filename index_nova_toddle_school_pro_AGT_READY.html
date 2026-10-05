@@ -661,7 +661,7 @@ async function centroFormacao(){
  };
  if(crud[tab]){
   const m=crud[tab]; let editing=null;
-  const formHtml=(row={})=>{let h='<form id="fcForm" class="grid" style="grid-template-columns:repeat(2,1fr)">';for(const f of m.fields){const val=row[f[0]]??"";if(f[2]==="checkbox")h+='<div><label>'+esc(f[1])+'</label><input id="fc_'+f[0]+'" type="checkbox" '+(val?"checked":"")+'></div>';else h+='<div><label>'+esc(f[1])+'</label><input id="fc_'+f[0]+'" type="'+f[2]+'" value="'+esc(val)+'"></div>}h+='<div style="grid-column:1/-1"><button class="primary">'+(editing?"Actualizar":"Guardar")+'</button>'+(editing?'<button type="button" id="fcCancel" class="secondary">Cancelar</button>':"")+'</div></form><div id="fcMsg"></div>';return h};
+  const formHtml=(row={})=>{let h='<form id="fcForm" class="grid" style="grid-template-columns:repeat(2,1fr)">';for(const f of m.fields){const val=row[f[0]]??"";if(f[2]==="checkbox")h+='<div><label>'+esc(f[1])+'</label><input id="fc_'+f[0]+'" type="checkbox" '+(val?"checked":"")+'></div>';else h+='<div><label>'+esc(f[1])+'</label><input id="fc_'+f[0]+'" type="'+f[2]+'" value="'+esc(val)+'"></div>'; }h+='<div style="grid-column:1/-1"><button class="primary">'+(editing?"Actualizar":"Guardar")+'</button>'+(editing?'<button type="button" id="fcCancel" class="secondary">Cancelar</button>':"")+'</div></form><div id="fcMsg"></div>';return h};
   async function draw(){
    const q=await db.from(m.table).select("*").eq("instituicao_id",me.instituicao_id).order("created_at",{ascending:false}).limit(200);
    const rows=q.data||[]; const cols=m.fields.map(f=>f[0]);
