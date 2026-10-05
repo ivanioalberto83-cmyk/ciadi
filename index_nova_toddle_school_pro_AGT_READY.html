@@ -662,7 +662,7 @@ async function centroFormacao(){
     if(!z){window.__novaFormacaoTab="dashboard";return centroFormacao();}
     const {data:rows,error}=await db.from(z[1]).select(z[2]).order("created_at",{ascending:false}).limit(200);
     shell('<div class="hero"><h1>'+z[0]+'</h1><p>Módulo ligado ao Supabase do NOVA TODDLE.</p></div>'+tabbar+
-      (error?'<div class="error">'+esc(error.message)+'</div>':'<div class="card"><table class="table"><tr>'+z[2].split(",").map(h=>'<th>'+esc(h)+'</th>').join("")+'</tr>'+((rows||[]).map(x=>'<tr>'+z[2].split(",").map(h=>'<td>'+esc(x[h]??"")+'</td>').join("")+'</tr>').join("")||'<tr><td colspan="'+z[2].split(",").length+'">Sem registos.</td></tr>')+'</table></div>');
+      (error?'<div class="error">'+esc(error.message)+'</div>':'<div class="card"><table class="table"><tr>'+z[2].split(",").map(h=>'<th>'+esc(h)+'</th>').join("")+'</tr>'+((rows||[]).map(x=>'<tr>'+z[2].split(",").map(h=>'<td>'+esc(x[h]??"")+'</td>').join("")+'</tr>').join("")||'<tr><td colspan="'+z[2].split(",").length+'">Sem registos.</td></tr>')+'</table></div>'));
   }
   document.querySelectorAll("[data-ft]").forEach(b=>b.onclick=()=>{window.__novaFormacaoTab=b.dataset.ft;centroFormacao()});
 }
