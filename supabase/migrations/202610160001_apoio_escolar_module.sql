@@ -4,6 +4,19 @@ alter table public.solicitacoes_apoio_escolar
   add column if not exists aluno_id uuid references public.alunos(id),
   add column if not exists encarregado_id uuid references public.encarregados(id);
 
+-- Split the existing ALL policy: a permissive ALL policy would also grant SELECT to finance/reception roles.
+drop policy if exists "tenant manage solicitacoes_apoio_escolar" on public.solicitacoes_apoio_escolar;
+create policy "apoio request tenant insert managers"
+on public.solicitacoes_apoio_escolar for insert to authenticated
+with check (private.can_manage_institution(instituicao_id));
+create policy "apoio request tenant update managers"
+on public.solicitacoes_apoio_escolar for update to authenticated
+using (private.can_manage_institution(instituicao_id))
+with check (private.can_manage_institution(instituicao_id));
+create policy "apoio request tenant delete managers"
+on public.solicitacoes_apoio_escolar for delete to authenticated
+using (private.can_manage_institution(instituicao_id));
+
 -- Replace the broad tenant SELECT policy so family profiles cannot enumerate all requests.
 drop policy if exists "tenant select solicitacoes_apoio_escolar" on public.solicitacoes_apoio_escolar;
 create policy "apoio request staff select tenant"
