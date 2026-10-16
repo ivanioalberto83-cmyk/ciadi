@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - fix/apoio-escolar-nova
+  pull_request:
+    branches:
+      - nova-toddle-escolar
   workflow_dispatch:
 
 permissions:
