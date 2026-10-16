@@ -33,6 +33,11 @@ with check (
       and p.instituicao_id = private.current_institution_id()
       and p.role in ('school_admin','principal','academic_director','teacher','staff')
   )
+  and exists (
+    select 1 from public.alunos a
+    where a.id = solicitacoes_apoio_escolar.aluno_id
+      and a.instituicao_id = solicitacoes_apoio_escolar.instituicao_id
+  )
 );
 
 create policy "apoio request family select linked child"
@@ -183,7 +188,13 @@ on public.progresso_apoio_escolar for select to authenticated
 using (
   private.is_super_admin()
   or (instituicao_id = private.current_institution_id()
-      and private.can_manage_institution(instituicao_id))
+      and exists (
+    select 1 from public.perfis p
+    where p.id = (select auth.uid())
+      and p.ativo = true
+      and p.instituicao_id = private.current_institution_id()
+      and p.role in ('school_admin','principal','academic_director','teacher','staff')
+  ))
   or (
     visivel_familia
     and exists (
@@ -205,6 +216,15 @@ with check (
       and p.ativo = true
       and p.instituicao_id = private.current_institution_id()
       and p.role in ('school_admin','principal','academic_director','teacher','staff')
+  )
+  and exists (
+    select 1
+    from public.planos_apoio_escolar pa
+    join public.alunos a on a.id = pa.aluno_id
+    where pa.id = progresso_apoio_escolar.plano_id
+      and pa.aluno_id = progresso_apoio_escolar.aluno_id
+      and pa.instituicao_id = progresso_apoio_escolar.instituicao_id
+      and a.instituicao_id = progresso_apoio_escolar.instituicao_id
   )
 );
 
@@ -228,6 +248,15 @@ with check (
       and p.ativo = true
       and p.instituicao_id = private.current_institution_id()
       and p.role in ('school_admin','principal','academic_director','teacher','staff')
+  )
+  and exists (
+    select 1
+    from public.planos_apoio_escolar pa
+    join public.alunos a on a.id = pa.aluno_id
+    where pa.id = progresso_apoio_escolar.plano_id
+      and pa.aluno_id = progresso_apoio_escolar.aluno_id
+      and pa.instituicao_id = progresso_apoio_escolar.instituicao_id
+      and a.instituicao_id = progresso_apoio_escolar.instituicao_id
   )
 );
 
