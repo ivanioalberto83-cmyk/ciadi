@@ -28,19 +28,15 @@ jobs:
         run: npm test
       - name: Electron entrypoint check
         run: npm run check
-      - name: Parse inline JavaScript in index.html
+      - name: Parse Apoio Escolar JavaScript function
         shell: pwsh
         run: |
           $html = Get-Content index.html -Raw
-          $matches = [regex]::Matches($html, '(?is)<script\b[^>]*>(.*?)</script>')
-          $i = 0
-          foreach ($match in $matches) {
-            $code = $match.Groups[1].Value
-            if ([string]::IsNullOrWhiteSpace($code)) { continue }
-            $i++
-            $path = Join-Path $env:TEMP "nova-inline-$i.js"
-            Set-Content -Path $path -Value $code -Encoding utf8
-            node --check $path
-            if ($LASTEXITCODE -ne 0) { throw "Erro de sintaxe no bloco JavaScript inline $i" }
-          }
-          if ($i -eq 0) { throw "Nenhum bloco JavaScript inline foi encontrado" }
+          $start = $html.IndexOf('async function apoioEscolar(){')
+          $end = $html.IndexOf('async function render(){', $start)
+          if ($start -lt 0 -or $end -le $start) { throw "Função Apoio Escolar não encontrada ou sem limite final" }
+          $code = $html.Substring($start, $end - $start)
+          $path = Join-Path $env:TEMP "nova-apoio-escolar.js"
+          Set-Content -Path $path -Value $code -Encoding utf8
+          node --check $path
+          if ($LASTEXITCODE -ne 0) { throw "Erro de sintaxe na função Apoio Escolar" }
