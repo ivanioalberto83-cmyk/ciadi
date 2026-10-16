@@ -4,6 +4,33 @@ alter table public.solicitacoes_apoio_escolar
   add column if not exists aluno_id uuid references public.alunos(id),
   add column if not exists encarregado_id uuid references public.perfis(id);
 
+-- Family access is limited to a linked child and the academic-view flag.
+create policy "apoio request family select linked child"
+on public.solicitacoes_apoio_escolar for select to authenticated
+using (
+  encarregado_id = (select auth.uid())
+  and exists (
+    select 1 from public.aluno_encarregado ae
+    where ae.aluno_id = solicitacoes_apoio_escolar.aluno_id
+      and ae.encarregado_id = (select auth.uid())
+      and ae.pode_ver_academico
+  )
+);
+
+create policy "apoio request family insert linked child"
+on public.solicitacoes_apoio_escolar for insert to authenticated
+with check (
+  solicitado_por = (select auth.uid())
+  and encarregado_id = (select auth.uid())
+  and exists (
+    select 1 from public.alunos a
+    join public.aluno_encarregado ae on ae.aluno_id = a.id
+    where a.id = solicitacoes_apoio_escolar.aluno_id
+      and a.instituicao_id = solicitacoes_apoio_escolar.instituicao_id
+      and ae.encarregado_id = (select auth.uid())
+  )
+);
+
 create table if not exists public.planos_apoio_escolar (
   id uuid primary key default gen_random_uuid(),
   instituicao_id uuid not null references public.instituicao(id),
