@@ -39,6 +39,11 @@ create trigger trg_auth_user_school_profile
 after insert on auth.users
 for each row execute function private.ensure_profile_from_auth();
 
+-- The existing upsert targets perfil_id; ensure the target has a unique constraint.
+-- A partial index preserves legacy rows that may not be linked to auth profiles.
+create unique index if not exists ux_formandos_perfil_id_not_null
+  on public.formandos (perfil_id) where perfil_id is not null;
+
 -- Preserve the existing course-formando workflow; do not create a course learner
 -- record for accounts explicitly registering as a school user.
 create or replace function private.ensure_formando_from_auth()
