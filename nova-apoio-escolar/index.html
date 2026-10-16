@@ -18,8 +18,23 @@
   <div class="eyebrow">Acesso seguro</div><h1>Bem-vindo</h1><p>Entre com a conta autorizada da NOVA Toddle School para aceder ao espaço de apoio escolar.</p>
   <div class="field"><label for="loginEmail">Email</label><input id="loginEmail" type="email" autocomplete="username" required placeholder="nome@escola.ao"></div>
   <div class="field"><label for="loginPassword">Palavra-passe</label><input id="loginPassword" type="password" autocomplete="current-password" required placeholder="Introduza a sua palavra-passe"></div>
-  <button class="btn" id="loginButton" type="submit" style="width:100%">Entrar</button><div id="authMessage" aria-live="polite"></div>
-  <div class="auth-foot">Acesso sujeito à existência de um perfil ativo associado a uma instituição. Este protótipo ainda não guarda pedidos nem registos clínicos.</div>
+  <button class="btn" id="loginButton" type="submit" style="width:100%">Entrar</button>
+  <button class="btn secondary" id="showRegisterButton" type="button" style="width:100%;margin-top:9px">Criar conta</button>
+  <div id="registerPanel" class="hidden">
+   <div style="border-top:1px solid var(--line);margin:22px 0 16px"></div>
+   <h2 style="font-size:19px;margin:0 0 4px">Registar nova conta</h2>
+   <p style="font-size:13px;margin-bottom:12px">A conta será criada no Supabase Auth. O acesso à aplicação só será ativado depois de um administrador associar o perfil a uma instituição.</p>
+   <form id="registerForm">
+    <div class="field"><label for="registerName">Nome completo</label><input id="registerName" type="text" autocomplete="name" maxlength="120" required placeholder="O seu nome"></div>
+    <div class="field"><label for="registerEmail">Email</label><input id="registerEmail" type="email" autocomplete="email" required placeholder="nome@escola.ao"></div>
+    <div class="field"><label for="registerPassword">Criar palavra-passe</label><input id="registerPassword" type="password" autocomplete="new-password" minlength="8" required placeholder="Mínimo de 8 caracteres"></div>
+    <div class="field"><label for="registerPasswordConfirm">Confirmar palavra-passe</label><input id="registerPasswordConfirm" type="password" autocomplete="new-password" minlength="8" required placeholder="Repita a palavra-passe"></div>
+    <button class="btn" id="registerButton" type="submit" style="width:100%">Registar no Supabase</button>
+    <button class="btn secondary" id="cancelRegisterButton" type="button" style="width:100%;margin-top:8px">Já tenho conta</button>
+   </form>
+  </div>
+  <div id="authMessage" aria-live="polite"></div>
+  <div class="auth-foot">O Supabase Auth gere a conta e a palavra-passe de forma segura. Não guardamos palavras-passe neste dispositivo. O acesso exige perfil ativo associado a uma instituição. Este protótipo ainda não guarda pedidos nem registos clínicos.</div>
  </form>
 </section>
 <div class="layout" id="appLayout">
