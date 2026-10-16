@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - nova-toddle-escolar
+      - fix/apoio-escolar-nova
 
 permissions:
   contents: read

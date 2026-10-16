@@ -1,0 +1,56 @@
+name: Validate Apoio Escolar changes
+
+on:
+  push:
+    branches:
+      - fix/apoio-escolar-nova
+  pull_request:
+    branches:
+      - nova-toddle-escolar
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Existing smoke tests
+        run: npm test
+      - name: Electron entrypoint check
+        run: npm run check
+      - name: Parse Apoio Escolar JavaScript function
+        shell: pwsh
+        run: |
+          $html = Get-Content index.html -Raw
+          $start = $html.IndexOf('async function apoioEscolar(){')
+          $end = $html.IndexOf('async function render(){', $start)
+          if ($start -lt 0 -or $end -le $start) { throw "Função Apoio Escolar não encontrada ou sem limite final" }
+          $code = $html.Substring($start, $end - $start)
+          $path = Join-Path $env:TEMP "nova-apoio-escolar.js"
+          Set-Content -Path $path -Value $code -Encoding utf8
+          node --check $path
+          if ($LASTEXITCODE -ne 0) { throw "Erro de sintaxe na função Apoio Escolar" }
+
+      - name: Package review artifact
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          git archive --format=zip --output=dist/NOVA-TODDLE-ESCOLAR-Apoio-Escolar.zip HEAD index.html docs/apoio-escolar-handoff.md tests/build-smoke.test.js supabase/migrations/202610160001_apoio_escolar_module.sql supabase/migrations/202610160002_public_registration_roles.sql supabase/tests/apoio_escolar_schema.test.sql .github/workflows/validate-apoio-escolar.yml
+          if ($LASTEXITCODE -ne 0) { throw "Falha ao empacotar artefacto de revisão" }
+      - name: Upload review artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: NOVA-TODDLE-ESCOLAR-Apoio-Escolar
+          path: dist/NOVA-TODDLE-ESCOLAR-Apoio-Escolar.zip
+          if-no-files-found: error
+          retention-days: 14
