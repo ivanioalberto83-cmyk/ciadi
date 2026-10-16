@@ -142,10 +142,7 @@
         const { data, error } = await db.auth.signUp({
           email,
           password,
-          options: {
-            data: { full_name: name },
-            emailRedirectTo: window.location.href.split("#")[0]
-          }
+          options: { data: { full_name: name } }
         });
         if (error) {
           showMessage("Não foi possível concluir o registo. Verifique o email, as regras de palavra-passe e a configuração de autenticação do Supabase.", "error");
