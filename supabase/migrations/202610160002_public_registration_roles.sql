@@ -75,7 +75,7 @@ begin
     nullif(new.raw_user_meta_data->>'morada',''),
     'ATIVO'
   )
-  on conflict (perfil_id) do update set
+  on conflict (perfil_id) where perfil_id is not null do update set
     email = excluded.email,
     nome_completo = excluded.nome_completo,
     telefone = coalesce(excluded.telefone, public.formandos.telefone),
