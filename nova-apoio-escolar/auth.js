@@ -14,6 +14,15 @@
   const emailInput = document.getElementById("loginEmail");
   const passwordInput = document.getElementById("loginPassword");
   const loginButton = document.getElementById("loginButton");
+  const showRegisterButton = document.getElementById("showRegisterButton");
+  const registerPanel = document.getElementById("registerPanel");
+  const registerForm = document.getElementById("registerForm");
+  const registerName = document.getElementById("registerName");
+  const registerEmail = document.getElementById("registerEmail");
+  const registerPassword = document.getElementById("registerPassword");
+  const registerPasswordConfirm = document.getElementById("registerPasswordConfirm");
+  const registerButton = document.getElementById("registerButton");
+  const cancelRegisterButton = document.getElementById("cancelRegisterButton");
   const message = document.getElementById("authMessage");
   const logoutButton = document.getElementById("logoutButton");
   const userLabel = document.getElementById("userLabel");
@@ -33,6 +42,13 @@
     loginButton.textContent = value ? "A verificar acesso…" : "Entrar";
     emailInput.disabled = value;
     passwordInput.disabled = value;
+  }
+
+  function showRegisterMode(enabled) {
+    registerPanel.classList.toggle("hidden", !enabled);
+    form.classList.toggle("hidden", enabled);
+    showRegisterButton.classList.toggle("hidden", enabled);
+    showMessage("");
   }
 
   function showLogin(text = "", type = "info") {
@@ -88,6 +104,70 @@
 
     db = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
       auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+    });
+
+    showRegisterButton.addEventListener("click", () => showRegisterMode(true));
+    cancelRegisterButton.addEventListener("click", () => {
+      registerForm.reset();
+      showRegisterMode(false);
+    });
+
+    registerForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (busy) return;
+      const name = registerName.value.trim();
+      const email = registerEmail.value.trim();
+      const password = registerPassword.value;
+      const confirmation = registerPasswordConfirm.value;
+
+      if (!name || !email || !password || !confirmation) {
+        showMessage("Preencha todos os campos do registo.", "error");
+        return;
+      }
+      if (password.length < 8) {
+        showMessage("A palavra-passe deve ter pelo menos 8 caracteres.", "error");
+        return;
+      }
+      if (password !== confirmation) {
+        showMessage("As palavras-passe não coincidem.", "error");
+        registerPasswordConfirm.focus();
+        return;
+      }
+
+      busy = true;
+      registerButton.disabled = true;
+      registerButton.textContent = "A criar conta…";
+      showMessage("A enviar o registo para o Supabase…");
+      try {
+        const { data, error } = await db.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { full_name: name },
+            emailRedirectTo: window.location.href.split("#")[0]
+          }
+        });
+        if (error) {
+          showMessage("Não foi possível concluir o registo. Verifique o email, as regras de palavra-passe e a configuração de autenticação do Supabase.", "error");
+          return;
+        }
+
+        // A conta de autenticação não concede acesso escolar por si só.
+        // Se o Supabase iniciar sessão automaticamente, terminá-la até existir perfil autorizado.
+        if (data && data.session) await db.auth.signOut();
+        registerForm.reset();
+        showRegisterMode(false);
+        showMessage("Pedido de registo enviado. Verifique o email caso seja pedida confirmação. Depois, contacte o administrador da instituição para associar a conta a um perfil ativo. Até essa validação, a aplicação continuará bloqueada.", "info");
+      } catch (error) {
+        console.error("Erro de registo NOVA:", error && error.message);
+        showMessage("O serviço de registo não respondeu. Tente novamente mais tarde.", "error");
+      } finally {
+        busy = false;
+        registerButton.disabled = false;
+        registerButton.textContent = "Registar no Supabase";
+        registerPassword.value = "";
+        registerPasswordConfirm.value = "";
+      }
     });
 
     form.addEventListener("submit", async (event) => {
