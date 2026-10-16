@@ -1,0 +1,43 @@
+name: Validate Apoio Escolar changes
+
+on:
+  push:
+    branches:
+      - fix/apoio-escolar-nova
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Existing smoke tests
+        run: npm test
+      - name: Electron entrypoint check
+        run: npm run check
+      - name: Parse inline JavaScript in index.html
+        shell: pwsh
+        run: |
+          $html = Get-Content index.html -Raw
+          $matches = [regex]::Matches($html, '(?is)<script\b[^>]*>(.*?)</script>')
+          $i = 0
+          foreach ($match in $matches) {
+            $code = $match.Groups[1].Value
+            if ([string]::IsNullOrWhiteSpace($code)) { continue }
+            $i++
+            $path = Join-Path $env:TEMP "nova-inline-$i.js"
+            Set-Content -Path $path -Value $code -Encoding utf8
+            node --check $path
+            if ($LASTEXITCODE -ne 0) { throw "Erro de sintaxe no bloco JavaScript inline $i" }
+          }
+          if ($i -eq 0) { throw "Nenhum bloco JavaScript inline foi encontrado" }
