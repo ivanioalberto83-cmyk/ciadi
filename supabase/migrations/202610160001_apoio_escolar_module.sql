@@ -15,7 +15,7 @@ using (
     select 1 from public.perfis p
     where p.id = (select auth.uid())
       and p.ativo = true
-      and p.instituicao_id = instituicao_id
+      and p.instituicao_id = private.current_institution_id()
       and p.role in ('school_admin','principal','academic_director','teacher','staff')
   ))
 );
@@ -30,7 +30,7 @@ with check (
     select 1 from public.perfis p
     where p.id = (select auth.uid())
       and p.ativo = true
-      and p.instituicao_id = instituicao_id
+      and p.instituicao_id = private.current_institution_id()
       and p.role in ('school_admin','principal','academic_director','teacher','staff')
   )
 );
@@ -114,7 +114,7 @@ using (
     select 1 from public.perfis p
     where p.id = (select auth.uid())
       and p.ativo = true
-      and p.instituicao_id = instituicao_id
+      and p.instituicao_id = private.current_institution_id()
       and p.role in ('school_admin','principal','academic_director','teacher','staff')
   ))
   or exists (
@@ -134,7 +134,7 @@ with check (
     select 1 from public.perfis p
     where p.id = (select auth.uid())
       and p.ativo = true
-      and p.instituicao_id = instituicao_id
+      and p.instituicao_id = private.current_institution_id()
       and p.role in ('school_admin','principal','academic_director','teacher','staff')
   ))
 );
@@ -148,7 +148,7 @@ using (
     select 1 from public.perfis p
     where p.id = (select auth.uid())
       and p.ativo = true
-      and p.instituicao_id = instituicao_id
+      and p.instituicao_id = private.current_institution_id()
       and p.role in ('school_admin','principal','academic_director','teacher','staff')
   ))
 )
@@ -159,7 +159,7 @@ with check (
     select 1 from public.perfis p
     where p.id = (select auth.uid())
       and p.ativo = true
-      and p.instituicao_id = instituicao_id
+      and p.instituicao_id = private.current_institution_id()
       and p.role in ('school_admin','principal','academic_director','teacher','staff')
   ))
 );
@@ -173,7 +173,7 @@ using (
     select 1 from public.perfis p
     where p.id = (select auth.uid())
       and p.ativo = true
-      and p.instituicao_id = instituicao_id
+      and p.instituicao_id = private.current_institution_id()
       and p.role in ('school_admin','principal','academic_director','teacher','staff')
   ))
 );
@@ -203,7 +203,7 @@ with check (
     select 1 from public.perfis p
     where p.id = (select auth.uid())
       and p.ativo = true
-      and p.instituicao_id = instituicao_id
+      and p.instituicao_id = private.current_institution_id()
       and p.role in ('school_admin','principal','academic_director','teacher','staff')
   )
 );
@@ -216,7 +216,7 @@ using (
     select 1 from public.perfis p
     where p.id = (select auth.uid())
       and p.ativo = true
-      and p.instituicao_id = instituicao_id
+      and p.instituicao_id = private.current_institution_id()
       and p.role in ('school_admin','principal','academic_director','teacher','staff')
   )
 )
@@ -226,7 +226,7 @@ with check (
     select 1 from public.perfis p
     where p.id = (select auth.uid())
       and p.ativo = true
-      and p.instituicao_id = instituicao_id
+      and p.instituicao_id = private.current_institution_id()
       and p.role in ('school_admin','principal','academic_director','teacher','staff')
   )
 );
@@ -239,7 +239,7 @@ using (
     select 1 from public.perfis p
     where p.id = (select auth.uid())
       and p.ativo = true
-      and p.instituicao_id = instituicao_id
+      and p.instituicao_id = private.current_institution_id()
       and p.role in ('school_admin','principal','academic_director','teacher','staff')
   )
 );
