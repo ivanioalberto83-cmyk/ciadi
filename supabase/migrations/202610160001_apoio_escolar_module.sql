@@ -9,7 +9,19 @@ drop policy if exists "tenant manage solicitacoes_apoio_escolar" on public.solic
 create policy "apoio request tenant insert managers"
 on public.solicitacoes_apoio_escolar for insert to authenticated
 with check (
-  private.can_manage_institution(instituicao_id)
+  (
+  private.is_super_admin()
+  or (
+    instituicao_id = private.current_institution_id()
+    and exists (
+      select 1 from public.perfis p
+      where p.id = (select auth.uid())
+        and p.ativo = true
+        and p.instituicao_id = private.current_institution_id()
+        and p.role in ('school_admin','principal','academic_director')
+    )
+  )
+)
   and exists (
     select 1 from public.alunos a
     where a.id = solicitacoes_apoio_escolar.aluno_id
@@ -18,9 +30,33 @@ with check (
 );
 create policy "apoio request tenant update managers"
 on public.solicitacoes_apoio_escolar for update to authenticated
-using (private.can_manage_institution(instituicao_id))
+using ((
+  private.is_super_admin()
+  or (
+    instituicao_id = private.current_institution_id()
+    and exists (
+      select 1 from public.perfis p
+      where p.id = (select auth.uid())
+        and p.ativo = true
+        and p.instituicao_id = private.current_institution_id()
+        and p.role in ('school_admin','principal','academic_director')
+    )
+  )
+))
 with check (
-  private.can_manage_institution(instituicao_id)
+  (
+  private.is_super_admin()
+  or (
+    instituicao_id = private.current_institution_id()
+    and exists (
+      select 1 from public.perfis p
+      where p.id = (select auth.uid())
+        and p.ativo = true
+        and p.instituicao_id = private.current_institution_id()
+        and p.role in ('school_admin','principal','academic_director')
+    )
+  )
+)
   and exists (
     select 1 from public.alunos a
     where a.id = solicitacoes_apoio_escolar.aluno_id
@@ -29,7 +65,19 @@ with check (
 );
 create policy "apoio request tenant delete managers"
 on public.solicitacoes_apoio_escolar for delete to authenticated
-using (private.can_manage_institution(instituicao_id));
+using ((
+  private.is_super_admin()
+  or (
+    instituicao_id = private.current_institution_id()
+    and exists (
+      select 1 from public.perfis p
+      where p.id = (select auth.uid())
+        and p.ativo = true
+        and p.instituicao_id = private.current_institution_id()
+        and p.role in ('school_admin','principal','academic_director')
+    )
+  )
+));
 
 -- Replace the broad tenant SELECT policy so family profiles cannot enumerate all requests.
 drop policy if exists "tenant select solicitacoes_apoio_escolar" on public.solicitacoes_apoio_escolar;
