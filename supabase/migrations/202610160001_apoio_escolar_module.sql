@@ -133,23 +133,28 @@ using (
 create policy "apoio plans insert staff"
 on public.planos_apoio_escolar for insert to authenticated
 with check (
-  private.is_super_admin()
-  or (instituicao_id = private.current_institution_id()
-      and exists (
+  (
+    private.is_super_admin()
+    or (instituicao_id = private.current_institution_id() and exists (
     select 1 from public.perfis p
     where p.id = (select auth.uid())
       and p.ativo = true
       and p.instituicao_id = private.current_institution_id()
       and p.role in ('school_admin','principal','academic_director','teacher','staff')
   ))
+  )
+  and exists (
+    select 1 from public.alunos a
+    where a.id = planos_apoio_escolar.aluno_id
+      and a.instituicao_id = planos_apoio_escolar.instituicao_id
+  )
 );
 
 create policy "apoio plans update staff"
 on public.planos_apoio_escolar for update to authenticated
 using (
   private.is_super_admin()
-  or (instituicao_id = private.current_institution_id()
-      and exists (
+  or (instituicao_id = private.current_institution_id() and exists (
     select 1 from public.perfis p
     where p.id = (select auth.uid())
       and p.ativo = true
@@ -158,15 +163,21 @@ using (
   ))
 )
 with check (
-  private.is_super_admin()
-  or (instituicao_id = private.current_institution_id()
-      and exists (
+  (
+    private.is_super_admin()
+    or (instituicao_id = private.current_institution_id() and exists (
     select 1 from public.perfis p
     where p.id = (select auth.uid())
       and p.ativo = true
       and p.instituicao_id = private.current_institution_id()
       and p.role in ('school_admin','principal','academic_director','teacher','staff')
   ))
+  )
+  and exists (
+    select 1 from public.alunos a
+    where a.id = planos_apoio_escolar.aluno_id
+      and a.instituicao_id = planos_apoio_escolar.instituicao_id
+  )
 );
 
 create policy "apoio plans delete staff"
