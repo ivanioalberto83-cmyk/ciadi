@@ -4,6 +4,16 @@ alter table public.solicitacoes_apoio_escolar
   add column if not exists aluno_id uuid references public.alunos(id),
   add column if not exists encarregado_id uuid references public.perfis(id);
 
+-- Replace the broad tenant SELECT policy so family profiles cannot enumerate all requests.
+drop policy if exists "tenant select solicitacoes_apoio_escolar" on public.solicitacoes_apoio_escolar;
+create policy "apoio request staff select tenant"
+on public.solicitacoes_apoio_escolar for select to authenticated
+using (
+  private.is_super_admin()
+  or (instituicao_id = private.current_institution_id()
+      and private.can_manage_institution(instituicao_id))
+);
+
 -- Family access is limited to a linked child and the academic-view flag.
 create policy "apoio request family select linked child"
 on public.solicitacoes_apoio_escolar for select to authenticated
@@ -74,7 +84,8 @@ create policy "apoio plans select tenant"
 on public.planos_apoio_escolar for select to authenticated
 using (
   private.is_super_admin()
-  or instituicao_id = private.current_institution_id()
+  or (instituicao_id = private.current_institution_id()
+      and private.can_manage_institution(instituicao_id))
   or exists (
     select 1 from public.aluno_encarregado ae
     where ae.aluno_id = planos_apoio_escolar.aluno_id
@@ -116,7 +127,8 @@ create policy "apoio progress select tenant"
 on public.progresso_apoio_escolar for select to authenticated
 using (
   private.is_super_admin()
-  or instituicao_id = private.current_institution_id()
+  or (instituicao_id = private.current_institution_id()
+      and private.can_manage_institution(instituicao_id))
   or (
     visivel_familia
     and exists (
