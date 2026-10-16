@@ -11,10 +11,30 @@ on public.solicitacoes_apoio_escolar for select to authenticated
 using (
   private.is_super_admin()
   or (instituicao_id = private.current_institution_id()
-      and private.can_manage_institution(instituicao_id))
+      and exists (
+    select 1 from public.perfis p
+    where p.id = (select auth.uid())
+      and p.ativo = true
+      and p.instituicao_id = instituicao_id
+      and p.role in ('school_admin','principal','academic_director','teacher','staff')
+  ))
 );
 
 -- Family access is limited to a linked child and the academic-view flag.
+create policy "apoio request staff insert tenant"
+on public.solicitacoes_apoio_escolar for insert to authenticated
+with check (
+  solicitado_por = (select auth.uid())
+  and instituicao_id = private.current_institution_id()
+  and exists (
+    select 1 from public.perfis p
+    where p.id = (select auth.uid())
+      and p.ativo = true
+      and p.instituicao_id = instituicao_id
+      and p.role in ('school_admin','principal','academic_director','teacher','staff')
+  )
+);
+
 create policy "apoio request family select linked child"
 on public.solicitacoes_apoio_escolar for select to authenticated
 using (
@@ -90,7 +110,13 @@ on public.planos_apoio_escolar for select to authenticated
 using (
   private.is_super_admin()
   or (instituicao_id = private.current_institution_id()
-      and private.can_manage_institution(instituicao_id))
+      and exists (
+    select 1 from public.perfis p
+    where p.id = (select auth.uid())
+      and p.ativo = true
+      and p.instituicao_id = instituicao_id
+      and p.role in ('school_admin','principal','academic_director','teacher','staff')
+  ))
   or exists (
     select 1 from public.aluno_encarregado ae
     where ae.aluno_id = planos_apoio_escolar.aluno_id
@@ -104,7 +130,13 @@ on public.planos_apoio_escolar for insert to authenticated
 with check (
   private.is_super_admin()
   or (instituicao_id = private.current_institution_id()
-      and private.can_manage_institution(instituicao_id))
+      and exists (
+    select 1 from public.perfis p
+    where p.id = (select auth.uid())
+      and p.ativo = true
+      and p.instituicao_id = instituicao_id
+      and p.role in ('school_admin','principal','academic_director','teacher','staff')
+  ))
 );
 
 create policy "apoio plans update staff"
@@ -112,12 +144,24 @@ on public.planos_apoio_escolar for update to authenticated
 using (
   private.is_super_admin()
   or (instituicao_id = private.current_institution_id()
-      and private.can_manage_institution(instituicao_id))
+      and exists (
+    select 1 from public.perfis p
+    where p.id = (select auth.uid())
+      and p.ativo = true
+      and p.instituicao_id = instituicao_id
+      and p.role in ('school_admin','principal','academic_director','teacher','staff')
+  ))
 )
 with check (
   private.is_super_admin()
   or (instituicao_id = private.current_institution_id()
-      and private.can_manage_institution(instituicao_id))
+      and exists (
+    select 1 from public.perfis p
+    where p.id = (select auth.uid())
+      and p.ativo = true
+      and p.instituicao_id = instituicao_id
+      and p.role in ('school_admin','principal','academic_director','teacher','staff')
+  ))
 );
 
 create policy "apoio plans delete staff"
@@ -125,7 +169,13 @@ on public.planos_apoio_escolar for delete to authenticated
 using (
   private.is_super_admin()
   or (instituicao_id = private.current_institution_id()
-      and private.can_manage_institution(instituicao_id))
+      and exists (
+    select 1 from public.perfis p
+    where p.id = (select auth.uid())
+      and p.ativo = true
+      and p.instituicao_id = instituicao_id
+      and p.role in ('school_admin','principal','academic_director','teacher','staff')
+  ))
 );
 
 create policy "apoio progress select tenant"
@@ -149,25 +199,49 @@ create policy "apoio progress insert staff"
 on public.progresso_apoio_escolar for insert to authenticated
 with check (
   instituicao_id = private.current_institution_id()
-  and private.can_manage_institution(instituicao_id)
+  and exists (
+    select 1 from public.perfis p
+    where p.id = (select auth.uid())
+      and p.ativo = true
+      and p.instituicao_id = instituicao_id
+      and p.role in ('school_admin','principal','academic_director','teacher','staff')
+  )
 );
 
 create policy "apoio progress update staff"
 on public.progresso_apoio_escolar for update to authenticated
 using (
   instituicao_id = private.current_institution_id()
-  and private.can_manage_institution(instituicao_id)
+  and exists (
+    select 1 from public.perfis p
+    where p.id = (select auth.uid())
+      and p.ativo = true
+      and p.instituicao_id = instituicao_id
+      and p.role in ('school_admin','principal','academic_director','teacher','staff')
+  )
 )
 with check (
   instituicao_id = private.current_institution_id()
-  and private.can_manage_institution(instituicao_id)
+  and exists (
+    select 1 from public.perfis p
+    where p.id = (select auth.uid())
+      and p.ativo = true
+      and p.instituicao_id = instituicao_id
+      and p.role in ('school_admin','principal','academic_director','teacher','staff')
+  )
 );
 
 create policy "apoio progress delete staff"
 on public.progresso_apoio_escolar for delete to authenticated
 using (
   instituicao_id = private.current_institution_id()
-  and private.can_manage_institution(instituicao_id)
+  and exists (
+    select 1 from public.perfis p
+    where p.id = (select auth.uid())
+      and p.ativo = true
+      and p.instituicao_id = instituicao_id
+      and p.role in ('school_admin','principal','academic_director','teacher','staff')
+  )
 );
 
 create index if not exists idx_apoio_planos_tenant_aluno
