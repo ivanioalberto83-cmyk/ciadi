@@ -13,12 +13,14 @@
 </head>
 <body>
 <section class="auth-screen" id="authScreen">
- <form class="auth-card" id="loginForm">
+ <div class="auth-card">
   <div class="auth-brand"><div class="logo">N</div><div><strong>NOVA Apoio Escolar</strong><div style="color:var(--muted);font-size:12px">Área reservada da comunidade escolar</div></div></div>
   <div class="eyebrow">Acesso seguro</div><h1>Bem-vindo</h1><p>Entre com a conta autorizada da NOVA Toddle School para aceder ao espaço de apoio escolar.</p>
-  <div class="field"><label for="loginEmail">Email</label><input id="loginEmail" type="email" autocomplete="username" required placeholder="nome@escola.ao"></div>
-  <div class="field"><label for="loginPassword">Palavra-passe</label><input id="loginPassword" type="password" autocomplete="current-password" required placeholder="Introduza a sua palavra-passe"></div>
-  <button class="btn" id="loginButton" type="submit" style="width:100%">Entrar</button>
+  <form id="loginForm">
+   <div class="field"><label for="loginEmail">Email</label><input id="loginEmail" type="email" autocomplete="username" required placeholder="nome@escola.ao"></div>
+   <div class="field"><label for="loginPassword">Palavra-passe</label><input id="loginPassword" type="password" autocomplete="current-password" required placeholder="Introduza a sua palavra-passe"></div>
+   <button class="btn" id="loginButton" type="submit" style="width:100%">Entrar</button>
+  </form>
   <button class="btn secondary" id="showRegisterButton" type="button" style="width:100%;margin-top:9px">Criar conta</button>
   <div id="registerPanel" class="hidden">
    <div style="border-top:1px solid var(--line);margin:22px 0 16px"></div>
@@ -35,7 +37,7 @@
   </div>
   <div id="authMessage" aria-live="polite"></div>
   <div class="auth-foot">O Supabase Auth gere a conta e a palavra-passe de forma segura. Não guardamos palavras-passe neste dispositivo. O acesso exige perfil ativo associado a uma instituição. Este protótipo ainda não guarda pedidos nem registos clínicos.</div>
- </form>
+</div>
 </section>
 <div class="layout" id="appLayout">
 <aside class="sidebar">
