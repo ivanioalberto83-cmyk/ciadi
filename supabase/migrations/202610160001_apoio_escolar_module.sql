@@ -8,11 +8,25 @@ alter table public.solicitacoes_apoio_escolar
 drop policy if exists "tenant manage solicitacoes_apoio_escolar" on public.solicitacoes_apoio_escolar;
 create policy "apoio request tenant insert managers"
 on public.solicitacoes_apoio_escolar for insert to authenticated
-with check (private.can_manage_institution(instituicao_id));
+with check (
+  private.can_manage_institution(instituicao_id)
+  and exists (
+    select 1 from public.alunos a
+    where a.id = solicitacoes_apoio_escolar.aluno_id
+      and a.instituicao_id = solicitacoes_apoio_escolar.instituicao_id
+  )
+);
 create policy "apoio request tenant update managers"
 on public.solicitacoes_apoio_escolar for update to authenticated
 using (private.can_manage_institution(instituicao_id))
-with check (private.can_manage_institution(instituicao_id));
+with check (
+  private.can_manage_institution(instituicao_id)
+  and exists (
+    select 1 from public.alunos a
+    where a.id = solicitacoes_apoio_escolar.aluno_id
+      and a.instituicao_id = solicitacoes_apoio_escolar.instituicao_id
+  )
+);
 create policy "apoio request tenant delete managers"
 on public.solicitacoes_apoio_escolar for delete to authenticated
 using (private.can_manage_institution(instituicao_id));
