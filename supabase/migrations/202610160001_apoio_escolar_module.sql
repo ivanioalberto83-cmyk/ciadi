@@ -2,7 +2,7 @@
 -- Rever com os responsáveis antes de aplicar. A migração é aditiva e mantém os dados existentes.
 alter table public.solicitacoes_apoio_escolar
   add column if not exists aluno_id uuid references public.alunos(id),
-  add column if not exists encarregado_id uuid references public.perfis(id);
+  add column if not exists encarregado_id uuid references public.encarregados(id);
 
 -- Replace the broad tenant SELECT policy so family profiles cannot enumerate all requests.
 drop policy if exists "tenant select solicitacoes_apoio_escolar" on public.solicitacoes_apoio_escolar;
@@ -18,11 +18,13 @@ using (
 create policy "apoio request family select linked child"
 on public.solicitacoes_apoio_escolar for select to authenticated
 using (
-  encarregado_id = (select auth.uid())
-  and exists (
-    select 1 from public.aluno_encarregado ae
-    where ae.aluno_id = solicitacoes_apoio_escolar.aluno_id
-      and ae.encarregado_id = (select auth.uid())
+  exists (
+    select 1
+    from public.encarregados e
+    join public.aluno_encarregado ae on ae.encarregado_id = e.id
+    where e.id = solicitacoes_apoio_escolar.encarregado_id
+      and e.perfil_id = (select auth.uid())
+      and ae.aluno_id = solicitacoes_apoio_escolar.aluno_id
       and ae.pode_ver_academico
   )
 );
@@ -31,13 +33,16 @@ create policy "apoio request family insert linked child"
 on public.solicitacoes_apoio_escolar for insert to authenticated
 with check (
   solicitado_por = (select auth.uid())
-  and encarregado_id = (select auth.uid())
   and exists (
-    select 1 from public.alunos a
+    select 1
+    from public.alunos a
     join public.aluno_encarregado ae on ae.aluno_id = a.id
+    join public.encarregados e on e.id = ae.encarregado_id
     where a.id = solicitacoes_apoio_escolar.aluno_id
       and a.instituicao_id = solicitacoes_apoio_escolar.instituicao_id
-      and ae.encarregado_id = (select auth.uid())
+      and e.id = solicitacoes_apoio_escolar.encarregado_id
+      and e.perfil_id = (select auth.uid())
+      and ae.pode_ver_academico
   )
 );
 
@@ -89,7 +94,7 @@ using (
   or exists (
     select 1 from public.aluno_encarregado ae
     where ae.aluno_id = planos_apoio_escolar.aluno_id
-      and ae.encarregado_id = (select auth.uid())
+      and ae.encarregado_id in (select e.id from public.encarregados e where e.perfil_id = (select auth.uid()))
       and ae.pode_ver_academico
   )
 );
@@ -134,7 +139,7 @@ using (
     and exists (
       select 1 from public.aluno_encarregado ae
       where ae.aluno_id = progresso_apoio_escolar.aluno_id
-        and ae.encarregado_id = (select auth.uid())
+        and ae.encarregado_id in (select e.id from public.encarregados e where e.perfil_id = (select auth.uid()))
         and ae.pode_ver_academico
     )
   )
