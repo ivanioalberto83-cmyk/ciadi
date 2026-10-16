@@ -26,6 +26,7 @@ assert.match(registrationMigration, /false\s*\n\s*\)\s*\n\s*on conflict/i);
 assert.match(registrationMigration, /trg_auth_user_school_profile/);
 assert.match(registrationMigration, /ensure_formando_from_auth/);
 assert.match(registrationMigration, /ux_formandos_perfil_id_not_null/);
+assert.match(registrationMigration, /on conflict \\(perfil_id\\) where perfil_id is not null do update set/i);
 
 
 const workflow = fs.readFileSync(".github/workflows/build-nova-toddle-windows.yml", "utf8");
