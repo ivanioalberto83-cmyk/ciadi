@@ -27,11 +27,22 @@ jobs:
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - name: Prepare public site only
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p site
+          cp index.html site/index.html
+          test -s site/index.html
+          echo "Public site prepared; repository internals are excluded."
 
       - name: Upload site
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: site
 
       - name: Deploy
         id: deployment
