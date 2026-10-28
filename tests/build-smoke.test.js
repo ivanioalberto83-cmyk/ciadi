@@ -28,7 +28,7 @@ assert.match(html, /Se existir uma conta associada a este email/);
 assert.doesNotMatch(html, /throw new Error\("Supabase JS indisponível"\)/);
 
 // Parse every inline JavaScript block without executing browser code.
-const inlineScripts = [...html.matchAll(/<script(?:\\s[^>]*)?>([\\s\\S]*?)<\\/script>/gi)]
+const inlineScripts = [...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)]
   .map((match) => match[1])
   .filter((script) => script.trim().length > 0);
 assert.ok(inlineScripts.length >= 2, "Expected boot and application inline scripts");
