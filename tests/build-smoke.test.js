@@ -20,6 +20,10 @@ assert.match(html, /s\.onload\s*=\s*function\s*\(\)\s*\{\s*clearTimeout\(timer\)
 assert.match(html, /s\.onerror\s*=\s*function\s*\(\)\s*\{\s*clearTimeout\(timer\)/);
 assert.match(html, /nova:supabase-ready/);
 assert.match(html, /__NOVA_BOOT_ERROR__/);
+assert.match(html, /resetPasswordForEmail/);
+assert.match(html, /id="forgotPassword"/);
+assert.match(html, /redirectTo:\s*window\.location\.origin\+window\.location\.pathname/);
+assert.match(html, /Se existir uma conta associada a este email/);
 assert.doesNotMatch(html, /throw new Error\("Supabase JS indisponível"\)/);
 
 const main = fs.readFileSync("electron/main.js", "utf8");
