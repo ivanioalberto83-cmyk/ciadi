@@ -20,10 +20,21 @@ Isto pode permitir que perfis não administrativos obtenham permissões de gest�
 
 **Ação bloqueante:** desenhar uma matriz explícita de papéis (super_admin global; administrador da escola; direção; professor; receção; contabilista; funcionário; encarregado/formando), rever todas as políticas que chamam `is_tenant_admin()` e testar acessos cruzados com duas instituições fictícias. Não corrigir simplesmente a função auxiliar sem rever os seus consumidores, pois isso pode bloquear fluxos legítimos ou deixar outras permissões inconsistentes.
 
+### Subachado crítico — alteração de papéis em `perfis`
+
+A política RLS `staff manage profiles` permite `ALL` a quem satisfaça `private.is_tenant_admin()`, com condição de linha centrada na instituição. A tabela `perfis` inclui a coluna `role`, e a inspeção não encontrou triggers na tabela que protejam alterações de papel. Como `is_tenant_admin()` inclui também `staff`, `reception` e `accountant`, a combinação cria um risco sério de um utilizador autorizado a editar perfis alterar o próprio papel para `super_admin`, se a política se aplicar como lida.
+
+**Classificação preliminar: crítico, requer validação imediata.** Não foi feita tentativa de exploração nem alteração na base de dados. A correção deve separar permissões de edição de dados de perfil das alterações de papel, impedir que o próprio utilizador altere `role`/`instituicao_id`, e reservar atribuição de papéis a um fluxo administrativo seguro que valide explicitamente a instituição e os papéis permitidos.
+
+### Subachado crítico — relações encarregado/aluno
+
+A política `staff manage student guardians` na tabela `aluno_encarregado` permite `ALL` a `is_tenant_admin()` sem condição explícita de instituição na linha. É necessário confirmar a estrutura da tabela e as relações associadas para garantir que um perfil escolar não consegue alterar ligações de alunos de outra instituição. Não foram executados testes de exploração nem alteradas políticas.
+
 ## Fase 1 — Autenticação e isolamento
 - [x] Adicionar pedido de recuperação de palavra-passe no login, com resposta genérica para reduzir enumeração de contas e retorno limitado à origem/caminho atuais; [ ] confirmar allowlist de Redirect URLs no Supabase e testar entrega do email.
 - [ ] Confirmar a atribuição segura de perfis; impedir autoelevação para super_admin.
-- [ ] **Bloqueante:** rever o uso demasiado amplo de `private.is_tenant_admin()` e a política `tenant admins manage teachers`, que não limita explicitamente o acesso à instituição atual.
+- [ ] **Bloqueante/crítico:** rever `staff manage profiles`: a política `ALL` permite gerir a coluna `role`, sem trigger de proteção observada; validar risco de autoelevação para `super_admin`.
+- [ ] **Bloqueante/crítico:** rever `tenant admins manage teachers` e `staff manage student guardians`, que não impõem explicitamente a instituição na condição da linha.
 - [ ] Testar isolamento entre duas instituições com contas de papéis distintos.
 - [ ] Rever as funções SECURITY DEFINER e o EXECUTE concedido a authenticated; só ajustar após verificar os consumidores e a matriz de permissões. Achado para revisão: `fiscal_emitir_documento` aceita `p_criado_por` como argumento e grava esse valor; confirmar se pode permitir falsificação de autoria antes de propor correção.
 - [ ] Rever tabelas com RLS ativo sem políticas e definir se o bloqueio é intencional ou se faltam políticas.
