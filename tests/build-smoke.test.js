@@ -1,5 +1,6 @@
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
+const vm = require("node:vm");
 
 const pkg = require("../package.json");
 assert.equal(pkg.name, "nova-toddle-escolar-desktop");
@@ -25,6 +26,15 @@ assert.match(html, /id="forgotPassword"/);
 assert.match(html, /redirectTo:\s*window\.location\.origin\+window\.location\.pathname/);
 assert.match(html, /Se existir uma conta associada a este email/);
 assert.doesNotMatch(html, /throw new Error\("Supabase JS indisponível"\)/);
+
+// Parse every inline JavaScript block without executing browser code.
+const inlineScripts = [...html.matchAll(/<script(?:\\s[^>]*)?>([\\s\\S]*?)<\\/script>/gi)]
+  .map((match) => match[1])
+  .filter((script) => script.trim().length > 0);
+assert.ok(inlineScripts.length >= 2, "Expected boot and application inline scripts");
+inlineScripts.forEach((script, index) => {
+  assert.doesNotThrow(() => new vm.Script(script, { filename: `index-inline-${index + 1}.js` }));
+});
 
 const main = fs.readFileSync("electron/main.js", "utf8");
 assert.match(main, /contextIsolation:\s*true/);
