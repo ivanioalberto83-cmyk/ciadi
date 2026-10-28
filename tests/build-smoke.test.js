@@ -43,7 +43,7 @@ for (const match of html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi))
 }
 const licenseMigration = fs.readFileSync("supabase/migrations/20261028140000_license_installation_control.sql", "utf8");
 assert.match(licenseMigration, /plataforma_instalacoes/);
-assert.match(licenseMigration, /ENABLE ROW LEVEL SECURITY/);
+assert.match(licenseMigration, /ENABLE ROW LEVEL SECURITY/i);
 const licenseFunction = fs.readFileSync("supabase/functions/license-control/index.ts", "utf8");
 assert.match(licenseFunction, /confirm_payment/);
 assert.match(licenseFunction, /profile.role !== "super_admin"/);
