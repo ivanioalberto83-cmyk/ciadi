@@ -21,6 +21,10 @@
 - Exportação de Storage e lista de objetos/tamanhos.
 - Plano para eliminar os dados de teste ao terminar, sujeito a aprovação.
 
+## Plano de recuperação automática
+
+O desenho escolhido para deteção de falhas e recuperação com salvaguardas está em [AUTO_RESTORE_PLAN_NOVA_TODDLE.md](AUTO_RESTORE_PLAN_NOVA_TODDLE.md). Até que o workflow seja implementado e testado, o plano não está ativo. A automatização inicial deve executar apenas em homologação; qualquer restauro em produção requer aprovação humana explícita.
+
 ## Automatização disponível no repositório
 
 Foi adicionado o script `scripts/backup/restore-nova-toddle.ps1`. É um executor controlado de restauro PostgreSQL, não um serviço autónomo de recuperação: exige um ficheiro de backup já obtido, hash SHA-256 esperado, ferramentas PostgreSQL e destino de homologação explicitamente autorizado.
