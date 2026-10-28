@@ -267,7 +267,7 @@ async function list(title,table){shell('<div class="card"><h1>'+title+'</h1><p c
 
 async function financeView(){
  if(!school()){shell('<div class="warn">Associe este perfil a uma escola para utilizar Faturação.</div>');return}
- const inst=me.instituicao_id;
+ const inst=me.instituicao_id;\n const fiscalTaxRulesReady=false; // Ativar apenas após integrar regras fiscais oficiais versionadas e validação no servidor.
  const [sr,dr]=await Promise.all([
   db.from("series_fiscais").select("id,instituicao_id,codigo,descricao,tipo_documento,exercicio,proximo_numero,ativa,codigo_agt,quantidade_autorizada,estado_agt").eq("instituicao_id",inst).eq("ativa",true).order("exercicio",{ascending:false}),
   db.from("documentos_fiscais").select("id,numero,tipo,data_emissao,cliente_nome,cliente_nif,subtotal,imposto,total,estado,status_agt,hash_fiscal").eq("instituicao_id",inst).order("data_emissao",{ascending:false}).limit(30)
@@ -275,7 +275,7 @@ async function financeView(){
  const series=sr.data||[],docs=dr.data||[];
  shell('<div class="hero"><h1>💰 Faturação e Fiscalidade</h1><p>Documentos fiscais, séries autorizadas, cálculo de linhas e estado AGT. A emissão só é permitida quando a série tem os dados de autorização necessários.</p></div>'+
  '<div class="grid"><div class="card stat"><strong>'+series.length+'</strong><span>Séries ativas</span></div><div class="card stat"><strong>'+docs.length+'</strong><span>Documentos recentes</span></div><div class="card stat"><strong>'+docs.filter(d=>d.status_agt==="validado"||d.status_agt==="aceite").length+'</strong><span>Marcados como validados</span></div><div class="card stat"><strong>'+docs.filter(d=>!d.hash_fiscal).length+'</strong><span>Sem hash fiscal</span></div></div>'+
- '<div class="card"><h2>Novo documento fiscal</h2><p class="muted">O cálculo usa a taxa informada por linha. Confirme o enquadramento fiscal antes de emitir. A emissão no sistema não significa aceitação pela AGT.</p>'+
+ '<div class="card"><h2>Novo documento fiscal</h2><p class="muted">As taxas inseridas servem apenas para pré-visualização. O esquema atual não tem regras fiscais oficiais versionadas e a RPC de emissão ainda precisa de bloqueio equivalente no servidor. Por segurança, esta interface não emite documentos fiscais até essa validação estar implementada.</p>'+
  (sr.error?'<div class="error">Não foi possível carregar séries fiscais: '+esc(sr.error.message)+'</div>':'')+
  (dr.error?'<div class="error">Não foi possível carregar documentos: '+esc(dr.error.message)+'</div>':'')+
  '<form id="fiscalForm" class="grid" style="grid-template-columns:repeat(2,minmax(0,1fr))">'+
@@ -293,15 +293,7 @@ async function financeView(){
  document.getElementById("addFiscalLine").onclick=()=>{const row=lineRoot.querySelector(".fiscal-line").cloneNode(true);row.querySelectorAll("input").forEach(el=>{if(el.dataset.k==="quantity")el.value="1";else if(el.dataset.k==="unitPrice"||el.dataset.k==="discount"||el.dataset.k==="taxRate")el.value="0";else if(el.dataset.k==="description")el.value=""});row.insertAdjacentHTML("beforeend",'<button type="button" class="secondary remove-line" style="grid-column:1/-1">Remover linha</button>');lineRoot.appendChild(row);row.querySelector(".remove-line").onclick=()=>{row.remove();previewFiscal()};row.querySelectorAll("input").forEach(el=>el.addEventListener("input",previewFiscal));previewFiscal()};
  lineRoot.querySelectorAll("input").forEach(el=>el.addEventListener("input",previewFiscal));
  document.getElementById("fiscalType").onchange=()=>{const type=fiscalType.value;Array.from(fiscalSeries.options).forEach(o=>{if(o.value)o.hidden=o.dataset.type!==type});fiscalSeries.value="";};
- fiscalForm.onsubmit=async e=>{e.preventDefault();msg.innerHTML="";const type=fiscalType.value,seriesId=fiscalSeries.value,seriesRow=series.find(s=>s.id===seriesId),date=fiscalDate.value;let totals;
- try{totals=previewFiscal();if(!totals)throw new Error("Corrija as linhas antes de continuar.");window.NOVAToddleEngines.validateFiscalSeries(seriesRow,type,date,inst)}catch(err){msg.innerHTML='<div class="error">'+esc(err.message)+'</div>';return}
- if(!confirm("Confirma a emissão do documento fiscal? Esta operação pode reservar número e gerar hash fiscal. Não confirma aceitação pela AGT."))return;
- const lines=totals.lines.map(l=>({descricao:l.description,quantidade:l.quantity,preco_unitario:l.unitPrice,desconto:l.discount,taxa_imposto:l.taxRate,unidade:"UN"}));
- msg.innerHTML='<div class="warn">A emitir documento…</div>';
- const {data,error}=await db.rpc("fiscal_emitir_documento",{p_instituicao_id:inst,p_serie_id:seriesId,p_tipo:type,p_cliente_nome:fiscalClient.value.trim(),p_cliente_nif:fiscalNif.value.trim()||null,p_cliente_email:fiscalEmail.value.trim()||null,p_cliente_telefone:fiscalPhone.value.trim()||null,p_aluno_id:null,p_data_emissao:date,p_data_vencimento:fiscalDue.value||null,p_linhas:lines,p_criado_por:me.id,p_documento_origem_id:null});
- if(error){msg.innerHTML='<div class="error">Emissão não concluída: '+esc(error.message)+'</div>';return}
- msg.innerHTML='<div class="ok">Documento criado: '+esc(data)+' . Confirme o estado, o hash e a submissão/validação AGT no registo fiscal. Esta ação não prova aceitação pela AGT.</div>';await financeView();
- };
+ fiscalForm.onsubmit=e=>{e.preventDefault();msg.innerHTML="";try{const totals=previewFiscal();if(!totals)throw new Error("Corrija as linhas antes de continuar.");if(!fiscalTaxRulesReady)throw new Error("Emissão bloqueada: ainda não existe uma tabela de taxas fiscais oficiais versionadas e validada, nem bloqueio equivalente no servidor. A pré-visualização não cria documento fiscal nem reserva número.");window.NOVAToddleEngines.validateFiscalSeries(series.find(s=>s.id===fiscalSeries.value),fiscalType.value,fiscalDate.value,inst);msg.innerHTML='<div class="ok">Validação concluída. Esta ação não emite o documento.</div>'}catch(err){msg.innerHTML='<div class="error">'+esc(err.message)+'</div>'}};
  document.querySelectorAll(".fiscal-post").forEach(btn=>btn.onclick=async()=>{if(!confirm("Contabilizar este documento? O sistema valida a configuração contabilística e o equilíbrio do lançamento."))return;const {data,error}=await db.rpc("contabilizar_documento_fiscal",{p_documento_id:btn.dataset.id});if(error){alert("Não foi possível contabilizar: "+error.message);return}alert("Contabilização registada. Referência: "+data);await financeView()});
  previewFiscal();
 }
