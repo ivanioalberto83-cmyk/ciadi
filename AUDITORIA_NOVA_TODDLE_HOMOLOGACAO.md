@@ -137,3 +137,26 @@ A inspeção estática de `scripts/backup/restore-nova-toddle.ps1` identificou u
 - [ ] Testar a restauração em ambiente isolado e validar schema, extensões, funções, triggers, grants, RLS, contagens e Storage.
 
 O script atual é um protótipo com salvaguardas, **não está aprovado para execução real**. Não foi executado qualquer restauro nem alterada a produção nesta revisão.
+
+
+## Fase 1 — revalidação direta das políticas e funções no Supabase (28-10-2026)
+
+Esta revalidação foi feita através de consultas SQL de leitura ao projeto NOVA TODDLE. Não foram executados DDL/DML nem alteradas políticas, funções, Auth ou dados.
+
+### Evidência confirmada
+
+1. **Política ampla em professores:** existem simultaneamente as políticas permissivas `staff manage teachers` e `tenant admins manage teachers`. A segunda permite `ALL` quando `private.is_tenant_admin()` é verdadeiro, sem condição explícita de instituição. Como políticas permissivas são combinadas por OR, a política ampla pode neutralizar a restrição institucional da política mais específica. **Bloqueador crítico até ser corrigido e testado em homologação.**
+2. **Perfis sem proteção de trigger:** a tabela `public.perfis` tem a política `staff manage profiles` com `ALL` e `WITH CHECK` baseado em `private.is_tenant_admin()` e `instituicao_id = private.current_institution_id()`. A consulta não encontrou triggers não internos em `public.perfis`. Não foi tentada autoelevação; a possibilidade de alteração indevida de `role` permanece um risco crítico que exige teste controlado e desenho de autorização separado.
+3. **Relações aluno/encarregado:** a política `staff manage student guardians` também permite `ALL` com `is_tenant_admin()` sem verificação explícita da instituição na própria condição. Exige validação da relação aluno/instituição e testes cruzados.
+4. **Função fiscal implantada diverge da proposta versionada:** a definição atualmente consultada de `public.fiscal_emitir_documento` continua a gravar `p_criado_por` diretamente e não valida explicitamente que `p_aluno_id` e `p_documento_origem_id` pertencem a `p_instituicao_id`. A proposta em `audit/proposed-migrations/20261028_hardening_fiscal_emitir_documento.sql` não está implantada. O código atual também usa `SET search_path TO 'public'`; deve ser revisto o risco de resolução de objetos numa função SECURITY DEFINER antes de aprovar uma correção.
+5. **Advisors de segurança repetidos:** foram observados 6 objetos com RLS sem políticas, 5 funções SECURITY DEFINER executáveis por `authenticated` e a proteção de palavras-passe comprometidas desativada. Estes avisos não justificam alterações automáticas: é necessário confirmar intenção, consumidores e impacto antes de mexer em permissões ou configuração.
+
+### Próximas ações de remediação — sem execução em produção
+
+- [ ] Criar migrações propostas separadas para rever/remover a política ampla de professores e limitar operações a uma instituição validada; não alterar a função auxiliar global sem mapear todos os seus consumidores.
+- [ ] Separar edição de campos de perfil da atribuição de `role` e `instituicao_id`; bloquear alterações pelo próprio utilizador e definir um fluxo administrativo explícito. Rever também INSERT/DELETE e contas privilegiadas.
+- [ ] Corrigir a política de `aluno_encarregado` com validação da instituição derivada do aluno e testar inserção, atualização e eliminação.
+- [ ] Rever as cinco funções SECURITY DEFINER individualmente: autorização por papel/instituição, `search_path` seguro, argumentos controlados pelo cliente, validação de relações, idempotência e privilégios EXECUTE. Não revogar EXECUTE até confirmar os fluxos legítimos.
+- [ ] Preparar testes negativos e positivos numa base de homologação isolada e recolher evidências antes de propor aplicação.
+
+**Estado após esta revisão:** a Fase 1 confirma riscos prioritários, mas não está concluída. Nenhuma correção foi aplicada ao projeto Supabase. A publicação permanece bloqueada até haver remediações revistas, testes aprovados e autorização explícita.
