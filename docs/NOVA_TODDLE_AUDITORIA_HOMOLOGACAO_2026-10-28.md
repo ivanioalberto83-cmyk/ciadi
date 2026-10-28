@@ -39,8 +39,8 @@
 5. As views `v_cobrancas_escolares` e `v_relatorio_pagamentos_escolares` têm a opção `security_invoker=true` confirmada na consulta atual.
 
 ## Bloqueadores funcionais já registados
-- SAF-T: divergência referida entre os tipos de documento aceites pela interface e pela função de exportação (interface `F/I/C` versus função `F/I/R`); confirmar nos ficheiros completos e testes antes de corrigir.
-- PDF fiscal: divergência referida entre `documento_fiscal_id` e `documento_id`; confirmar contrato de dados entre emissão, consulta e geração do PDF.
+- **SAF-T — divergência confirmada e corrigida na branch:** a interface apresentava `F/I/C`, enquanto a Edge Function `saft-gerar` aceita `F/I/R`. Foi alterado o valor da opção contabilística de `C` para `R` apenas no ficheiro `index_nova_toddle_school_pro_AGT_READY.html`. A correção foi verificada no GitHub. Ainda falta testar a função autenticada; não foi publicada nem se afirma conformidade oficial.
+- **PDF fiscal — erro de coluna confirmado e corrigido na branch:** a função `gerar-documento-pdf` consultava `documentos_fiscais_linhas.documento_fiscal_id`, mas o esquema real usa `documento_id`. A versão corrigida foi adicionada a `supabase/functions/gerar-documento-pdf/index.ts` e verificada no GitHub. **A função ativa no Supabase não foi redeployada** e permanece por corrigir em produção até existir autorização e plano de testes. A interface atual também não invoca ainda esta função; a integração ponta a ponta do PDF continua pendente.
 - Ciclo financeiro ainda carece de teste autenticado ponta a ponta: aluno → cobrança → pagamento → documento fiscal → contabilização → SAF-T → fecho.
 - RH e Aprovisionamento precisam de validação funcional real (criar, guardar, consultar, editar e autorizar) com perfis apropriados.
 - Isolamento multiempresa deve ser testado com duas instituições de teste e utilizadores de cada instituição, comprovando que uma instituição não lê nem altera dados da outra.
