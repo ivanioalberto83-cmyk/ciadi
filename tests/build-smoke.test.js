@@ -10,7 +10,8 @@ assert.match(pkg.scripts["dist:win"], /electron-builder/);
 const html = fs.readFileSync("index.html", "utf8");
 assert.match(html, /NOVA_BOOT_SCREEN/);
 assert.match(html, /loadSupabaseClient/);
-assert.match(html, /setTimeout\(.*Supabase/);
+assert.match(html, /setTimeout\(function\(\)\{s\.remove\(\);next\(\);\},8000\)/);
+assert.match(html, /Supabase JS não pôde ser carregado/);
 assert.doesNotMatch(html, /throw new Error\("Supabase JS indisponível"\)/);
 
 const workflow = fs.readFileSync(".github/workflows/build-nova-toddle-windows.yml", "utf8");
