@@ -18,9 +18,13 @@ assert.match(html, /LICENSE_ENFORCEMENT_ENABLED=false/);
 assert.match(html, /license-control/);
 assert.match(html, /Licenças e instalações/);
 assert.match(html, /Confirmar pagamento verificado/);
-for (const match of html.matchAll(/<script(?:\\s[^>]*)?>([\\s\\S]*?)<\\/script>/gi)) {
+
+// Parse every inline JavaScript block. The previous pattern over-escaped
+// the whitespace, character-class and closing-tag escapes, causing a syntax error.
+for (const match of html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)) {
   new vm.Script(match[1], { filename: "index-inline-script.js" });
 }
+
 const licenseMigration = fs.readFileSync("supabase/migrations/20261028140000_license_installation_control.sql", "utf8");
 assert.match(licenseMigration, /plataforma_instalacoes/);
 assert.match(licenseMigration, /ENABLE ROW LEVEL SECURITY/);
@@ -28,7 +32,6 @@ const licenseFunction = fs.readFileSync("supabase/functions/license-control/inde
 assert.match(licenseFunction, /confirm_payment/);
 assert.match(licenseFunction, /profile.role !== "super_admin"/);
 assert.match(licenseFunction, /plataforma_licenca_eventos/);
-
 
 const workflow = fs.readFileSync(".github/workflows/build-nova-toddle-windows.yml", "utf8");
 assert.match(workflow, /nova-toddle-escolar-windows-installer/);
