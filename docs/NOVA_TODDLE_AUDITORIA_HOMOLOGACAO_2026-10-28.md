@@ -75,3 +75,25 @@ Nenhuma função SQL, política RLS, GRANT, dado ou Edge Function ativa foi alte
 
 ## Limites desta auditoria
 Este relatório documenta os resultados de consultas de leitura e avisos do Advisor observados em 2026-10-28. Não foi realizado teste de penetração, não foram feitas alterações à base de dados e não existe evidência nesta fase de homologação oficial AGT.
+
+
+## Terceira ronda — estratégia de homologação gratuita (leitura apenas, 2026-10-28)
+
+### Decisão de custo
+- O projeto correto foi confirmado na organização `CIADI PROJECT SITE`, projeto `NOVA TODDLE ESCOLAR`, ref `rojyxfjaidyvtmsmefcf`, estado `ACTIVE_HEALTHY`.
+- O custo apresentado para uma branch Supabase foi de **US$ 0,01344/hora**. Por decisão do utilizador, não criar a branch paga nesta fase.
+- Estratégia escolhida: trabalhar no GitHub na branch `nova-toddle-escolar`, manter o Supabase de produção apenas em leitura, usar testes locais e dados fictícios sempre que possível. Esta abordagem não substitui os testes de escrita/concor­rência num banco isolado.
+
+### Revalidação dos avisos do Supabase Advisor
+- Segurança: continuam 6 tabelas com RLS ativado e sem políticas; continuam 5 funções `SECURITY DEFINER` acessíveis a `authenticated`; continua desativada a proteção de palavras-passe comprometidas.
+- Desempenho: o Advisor continua a reportar 120 chaves estrangeiras sem índice de cobertura.
+- Privilégios observados nesta ronda: `fiscal_emitir_documento`, `nova_registar_pagamento` e `nova_vincular_documento_cobranca` têm EXECUTE para `authenticated`; `contabilizar_documento_fiscal` não tem EXECUTE direto concedido a `anon` nem a `authenticated` na ACL consultada.
+- Nenhuma migração, alteração de esquema, política RLS, grant, dado ou função ativa foi aplicada. O ficheiro de migração de hardening na branch continua a ser apenas uma proposta, não testada; não executar em produção nem assumir que está pronta sem revisão de assinaturas, esquema, permissões e testes.
+
+### Próximos passos sem custo adicional de infraestrutura
+1. Rever a proposta SQL contra as definições reais do esquema e das funções antes de considerá-la executável.
+2. Preparar testes automatizáveis de validação estática e casos de teste com dados fictícios para isolamento multiempresa, autoria, tipo de documento, pagamentos e contabilização.
+3. Verificar a integração do PDF na interface e validar SAF-T/PDF localmente; deployment de Edge Functions fica pendente de autorização e ambiente de teste.
+4. Não alterar políticas das seis tabelas até confirmar GRANTs, finalidade e matriz de acesso.
+5. Manter homologação pendente até existirem evidências dos testes dinâmicos, backup/restauração e validação fiscal aplicável.
+
