@@ -45,4 +45,5 @@ Este código NÃO reutiliza a arquitetura clínica do CIADI. O repositório GitH
 - A confirmação de pagamento é manual e exclusiva do Super Admin, exige valor integral da fatura e referência do comprovativo, e regista auditoria.
 - O estado `active` só deve ser atribuído depois de confirmação real do recebimento. A data de fim da assinatura deve ser validada/atualizada separadamente; confirmar uma fatura não inventa um novo período.
 - A migração e a função ainda precisam de ser aplicadas/publicadas no projeto Supabase NOVA TODDLE. Não foram alterados dados de produção nem políticas existentes nesta etapa.
+- A fiscalização obrigatória na web está protegida pela flag `LICENSE_ENFORCEMENT_ENABLED=false` em `index.html`; só a ativar depois de validar a migration, a Edge Function e os testes de licença, para não bloquear clientes durante uma implantação incompleta.
 - Antes de ativar a fiscalização obrigatória, fazer backup e teste de restauro, validar RLS e testar trial, pagamento pendente, pagamento confirmado, expiração, limite de instalações, revogação e isolamento entre instituições.
