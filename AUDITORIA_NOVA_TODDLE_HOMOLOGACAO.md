@@ -8,9 +8,22 @@ Estado: auditoria em curso. Este documento é um registo de trabalho; não certi
 - Usar apenas contas, instituições, alunos, profissionais, documentos e pagamentos fictícios num ambiente de teste isolado.
 - Não colocar chaves secretas, tokens, palavras-passe ou dados pessoais neste repositório.
 
+## Achado de segurança prioritário — isolamento entre instituições
+
+A leitura das políticas RLS e funções auxiliares no Supabase revelou uma combinação que deve ser tratada como crítica e validada em ambiente isolado antes de qualquer correção:
+
+- `private.is_tenant_admin()` devolve verdadeiro para os papéis `school_admin`, `principal`, `academic_director`, `accountant`, `reception` e `staff`.
+- Várias políticas de gestão utilizam essa função como condição administrativa, incluindo políticas para alunos e instituição.
+- A política `tenant admins manage teachers` da tabela `professores` utiliza `private.is_super_admin() OR private.is_tenant_admin()` sem uma condição explícita que limite a linha à instituição atual.
+
+Isto pode permitir que perfis não administrativos obtenham permissões de gestão demasiado amplas e, na política de professores, potencialmente entre instituições. É um achado baseado na lógica SQL; não foi executado teste de exploração nem alterada qualquer política.
+
+**Ação bloqueante:** desenhar uma matriz explícita de papéis (super_admin global; administrador da escola; direção; professor; receção; contabilista; funcionário; encarregado/formando), rever todas as políticas que chamam `is_tenant_admin()` e testar acessos cruzados com duas instituições fictícias. Não corrigir simplesmente a função auxiliar sem rever os seus consumidores, pois isso pode bloquear fluxos legítimos ou deixar outras permissões inconsistentes.
+
 ## Fase 1 — Autenticação e isolamento
 - [x] Adicionar pedido de recuperação de palavra-passe no login, com resposta genérica para reduzir enumeração de contas e retorno limitado à origem/caminho atuais; [ ] confirmar allowlist de Redirect URLs no Supabase e testar entrega do email.
 - [ ] Confirmar a atribuição segura de perfis; impedir autoelevação para super_admin.
+- [ ] **Bloqueante:** rever o uso demasiado amplo de `private.is_tenant_admin()` e a política `tenant admins manage teachers`, que não limita explicitamente o acesso à instituição atual.
 - [ ] Testar isolamento entre duas instituições com contas de papéis distintos.
 - [ ] Rever as funções SECURITY DEFINER e o EXECUTE concedido a authenticated; só ajustar após verificar os consumidores e a matriz de permissões. Achado para revisão: `fiscal_emitir_documento` aceita `p_criado_por` como argumento e grava esse valor; confirmar se pode permitir falsificação de autoria antes de propor correção.
 - [ ] Rever tabelas com RLS ativo sem políticas e definir se o bloqueio é intencional ou se faltam políticas.
