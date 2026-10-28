@@ -62,5 +62,23 @@ Isto pode permitir que perfis não administrativos obtenham permissões de gest�
 - Funções de cobrança e emissão fiscal têm EXECUTE concedido a authenticated; a autorização interna de cada função necessita de revisão.
 - A auditoria de código não substitui testes de ponta a ponta nem validação fiscal independente.
 
+## Verificação de integridade dos dados (consultas só de leitura)
+
+Consulta agregada às tabelas principais:
+- Alunos: 1 registo.
+- Matrículas, presenças, resultados, cobranças escolares, pagamentos escolares, documentos fiscais, linhas fiscais, RH, denúncias SOS e conversas/mensagens de IA: 0 registos nas tabelas consultadas.
+- As verificações de órfãos para matrículas, presenças, resultados, pagamentos, linhas fiscais e cobranças não encontraram ocorrências.
+- Não foram encontradas divergências entre a instituição da cobrança e a do aluno, nem entre a instituição do aluno e a da turma nas matrículas.
+
+Interpretação: estas verificações de integridade passaram para os dados atualmente existentes, mas a base de dados quase vazia não permite validar fluxos reais de ponta a ponta. A homologação funcional exige um ambiente de teste com dados fictícios e cenários completos; não inserir dados de teste na produção.
+
+## Rastreabilidade do código de backend
+
+A árvore da branch principal contém o código-fonte versionado da função `nova-ai`, mas não contém fontes equivalentes para todas as Edge Functions identificadas no projeto Supabase. Os geradores PDF, exportações e SAF-T não devem ser considerados auditados até que a fonte exata implantada esteja recuperada e comparada com a versão versionada. Esta divergência reduz a reprodutibilidade e aumenta o risco de alterações não rastreadas.
+
+## Proposta fiscal de revisão
+
+Foi colocado em `audit/proposed-migrations/20261028_hardening_fiscal_emitir_documento.sql` um rascunho de reforço para validar a instituição do aluno e do documento de origem, e fixar a autoria no utilizador autenticado. Está fora de `supabase/migrations` intencionalmente para evitar execução automática. Não foi aplicado nem validado pelo motor PostgreSQL; exige revisão e testes numa cópia isolada antes de qualquer adoção.
+
 ## Critério de saída
 Cada item só pode ser marcado como concluído quando houver evidência reproduzível, resultado do teste e revisão. Nenhuma alteração de produção ou publicação está autorizada por este documento.
