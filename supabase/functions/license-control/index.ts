@@ -49,6 +49,64 @@ Deno.serve(async (req: Request) => {
       return respond({ ok: false, valid: false, state: "denied", reason: "Perfil ativo não encontrado." }, 403);
     }
 
+    if (action === "confirm_payment") {
+      if (profile.role !== "super_admin") {
+        return respond({ ok: false, error: "Apenas o Super Admin pode confirmar pagamentos." }, 403);
+      }
+      const invoiceId = String(body?.invoice_id || "");
+      const amount = Number(body?.amount);
+      const method = String(body?.method || "").trim().slice(0, 80);
+      const reference = String(body?.reference || "").trim().slice(0, 160);
+      if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(invoiceId)
+          || !Number.isFinite(amount) || amount <= 0 || !method || !reference) {
+        return respond({ ok: false, error: "Indique fatura, valor recebido, método e referência comprovativa." }, 400);
+      }
+      const { data: invoice, error: invoiceError } = await adminDb
+        .from("plataforma_faturas")
+        .select("id,instituicao_id,plano_id,total,estado,numero")
+        .eq("id", invoiceId).maybeSingle();
+      if (invoiceError || !invoice) return respond({ ok: false, error: "Fatura não encontrada." }, 404);
+      if (invoice.estado === "paga") return respond({ ok: false, error: "Esta fatura já está marcada como paga." }, 409);
+      if (["cancelada", "rascunho"].includes(String(invoice.estado))) {
+        return respond({ ok: false, error: "Não é possível confirmar uma fatura cancelada ou em rascunho." }, 409);
+      }
+      const expected = Number(invoice.total);
+      if (Math.abs(amount - expected) > 0.01) {
+        return respond({ ok: false, error: `O valor recebido deve corresponder ao total da fatura (${expected.toFixed(2)} AOA).` }, 400);
+      }
+      const { data: payment, error: paymentError } = await adminDb.from("plataforma_pagamentos").insert({
+        fatura_id: invoice.id, valor: amount, metodo: method, referencia: reference,
+        estado: "confirmado", pago_em: new Date().toISOString(), provedor: "confirmacao_manual",
+        transacao_externa: reference,
+        metadata: { confirmado_por: userData.user.id, modo: "manual", fatura_numero: invoice.numero },
+      }).select("id").single();
+      if (paymentError) return respond({ ok: false, error: "Não foi possível registar o pagamento; a fatura não foi alterada." }, 500);
+      const { error: invoiceUpdateError } = await adminDb.from("plataforma_faturas")
+        .update({ estado: "paga" }).eq("id", invoice.id);
+      if (invoiceUpdateError) {
+        await adminDb.from("plataforma_pagamentos").update({ estado: "falhado" }).eq("id", payment.id);
+        return respond({ ok: false, error: "O pagamento foi registado, mas a atualização da fatura falhou. Verifique a reconciliação antes de repetir." }, 500);
+      }
+      const { data: subscription } = await adminDb.from("plataforma_assinaturas")
+        .select("id,fim").eq("instituicao_id", invoice.instituicao_id)
+        .order("created_at", { ascending: false }).limit(1).maybeSingle();
+      if (subscription) {
+        const { error: subscriptionError } = await adminDb.from("plataforma_assinaturas")
+          .update({ estado: "active", plano_id: invoice.plano_id || undefined, updated_at: new Date().toISOString() })
+          .eq("id", subscription.id);
+        if (subscriptionError) {
+          return respond({ ok: false, payment_recorded: true, invoice_paid: true, error: "Pagamento confirmado, mas não foi possível atualizar a assinatura. Reveja a assinatura no painel." }, 500);
+        }
+      }
+      await adminDb.from("instituicao").update({ status: "active" }).eq("id", invoice.instituicao_id);
+      await adminDb.from("plataforma_licenca_eventos").insert({
+        instituicao_id: invoice.instituicao_id, evento: "pagamento_confirmado",
+        estado: "active", motivo: `Fatura ${invoice.numero} confirmada manualmente; referência ${reference}.`,
+        ator_id: userData.user.id, metadata: { invoice_id: invoice.id, payment_id: payment.id, amount, method },
+      });
+      return respond({ ok: true, state: "confirmed", invoice_id: invoice.id, payment_id: payment.id, note: "Pagamento registado. Confirme a data de fim da assinatura antes de considerar a licença renovada." });
+    }
+
     if (action === "revoke") {
       if (profile.role !== "super_admin") {
         return respond({ ok: false, error: "Apenas o Super Admin pode revogar instalações." }, 403);
