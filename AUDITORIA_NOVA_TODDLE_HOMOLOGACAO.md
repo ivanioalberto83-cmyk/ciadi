@@ -124,3 +124,16 @@ Foi criado um plano separado em `docs/plans/2026-10-28-ciberseguranca-backups-no
 
 **Limitações atuais:** não foi executado backup novo, não foi testado restauro, e não foi alterada qualquer configuração de produção. O backup de Postgres não deve ser tratado como cópia dos objetos Storage. A frequência diária e retenção inicial de 30 dias são propostas para aprovação, não configurações ativas. RPO/RTO, destino externo, custo e gestão de chaves permanecem por decidir.
 
+
+
+## Revisão adicional — segurança do procedimento de restauro
+
+A inspeção estática de `scripts/backup/restore-nova-toddle.ps1` identificou um bloqueio adicional antes de qualquer teste real: a URI completa de ligação (`$databaseUrl`) é passada como argumento de linha de comando a `pg_restore`/`psql`. Se a URI incluir credenciais, estas podem ficar expostas na lista de processos ou em ferramentas de diagnóstico do sistema.
+
+- [ ] **Bloqueante:** retirar o segredo dos argumentos do processo antes de usar o script em homologação. Preferir um mecanismo de credenciais suportado pelo PostgreSQL e adequado ao sistema operativo (por exemplo, ficheiro `pgpass` temporário com permissões restritas), com limpeza garantida em bloco `finally`; não registar URI, utilizador ou palavra-passe.
+- [ ] Validar a interpretação de URI/hostname e a allowlist com casos negativos, incluindo hosts semelhantes ao host autorizado, URI malformada e destino de produção.
+- [ ] Rever opções destrutivas (`--clean --if-exists`) e exigir uma base de homologação descartável, previamente identificada e sem integrações reais.
+- [ ] Confirmar o hash por manifesto independente e verificar a origem, integridade e proteção do backup antes de restaurar.
+- [ ] Testar a restauração em ambiente isolado e validar schema, extensões, funções, triggers, grants, RLS, contagens e Storage.
+
+O script atual é um protótipo com salvaguardas, **não está aprovado para execução real**. Não foi executado qualquer restauro nem alterada a produção nesta revisão.
