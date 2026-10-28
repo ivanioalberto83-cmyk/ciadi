@@ -43,7 +43,7 @@ Isto pode permitir que perfis não administrativos obtenham permissões de gest�
 
 ## Fase 4 — Exportações, IA e SOS
 - [ ] Comparar PDF, XLSX e CSV com os registos de origem, incluindo paginação, acentos, totais e datas.
-- [ ] Testar permissões, minimização de dados e isolamento institucional na IA.
+- [ ] Testar permissões, minimização de dados e isolamento institucional na IA; configurar `NOVA_AI_ALLOWED_ORIGINS` explicitamente e rever o envio de nomes de alunos ao fornecedor externo.
 - [ ] Testar denúncia anónima, controlo de acesso e entrega efetiva de notificações SOS.
 - [ ] Verificar que dados de saúde, alunos e RH não são expostos por URLs ou logs.
 
@@ -61,6 +61,19 @@ Isto pode permitir que perfis não administrativos obtenham permissões de gest�
 - O teste smoke original usava uma expressão regular frágil que não refletia a estrutura real do timeout.
 - Funções de cobrança e emissão fiscal têm EXECUTE concedido a authenticated; a autorização interna de cada função necessita de revisão.
 - A auditoria de código não substitui testes de ponta a ponta nem validação fiscal independente.
+
+## Achado funcional de autenticação — registo público de formandos
+
+O formulário público chama `auth.signUp` e envia metadados com `role: "formando"`. A enumeração SQL de `public.user_role` não contém o valor `formando`; contém, entre outros, `student`. A única trigger encontrada em `auth.users` é `private.ensure_formando_from_auth()`, que cria um registo em `public.formandos`, mas não cria um registo em `public.perfis`. Por sua vez, a função `load()` da aplicação exige um registo ativo em `perfis` e devolve "Perfil não encontrado" se não existir.
+
+Conclusão: o fluxo de auto-registo público parece não criar o perfil exigido pelo login geral. Não foi feito um registo de teste real porque o ambiente não está isolado. Antes de corrigir, é necessário definir o modelo de identidade dos formandos (por exemplo, um perfil `student` com acesso apenas ao LMS, ou uma área de autenticação separada) e testar o ciclo criar conta → confirmar email → entrar → consultar cursos, sem permitir que metadados do utilizador atribuam papéis privilegiados.
+
+## Achados adicionais de IA e privacidade
+
+- A Edge Function `nova-ai` valida o Bearer token, verifica o perfil ativo e confirma que o aluno selecionado pertence à instituição do perfil. Estes são controlos positivos observados no código.
+- Quando um aluno é selecionado, o nome do aluno é incluído no contexto enviado ao fornecedor externo de IA. Confirmar base legal, transparência/consentimento, retenção e minimização de dados antes de uso com alunos reais.
+- O CORS da função permite origens de qualquer domínio quando `NOVA_AI_ALLOWED_ORIGINS` está ausente/vazio ou contém `*`. A função exige autenticação, mas a lista de origens deve ser configurada explicitamente para os domínios aprovados e testada.
+- Não foi possível auditar o conteúdo real das outras Edge Functions a partir dos ficheiros versionados; ver a secção de rastreabilidade abaixo.
 
 ## Verificação de integridade dos dados (consultas só de leitura)
 
