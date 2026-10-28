@@ -46,6 +46,24 @@
 - Isolamento multiempresa deve ser testado com duas instituições de teste e utilizadores de cada instituição, comprovando que uma instituição não lê nem altera dados da outra.
 - Backup e restauração: a restauração ainda não está comprovada por teste documentado.
 
+## Segunda ronda — revisão das funções financeiras (leitura apenas, 2026-10-28)
+
+### Confirmações adicionais
+- As seis tabelas sem políticas têm efetivamente `relrowsecurity=true` e zero entradas em `pg_policies`. O efeito exato depende também dos GRANTs; não se deve assumir que estão expostas. É preciso verificar os GRANTs e o uso esperado antes de adicionar políticas.
+- `public.fiscal_emitir_documento(...)` aceita EXECUTE por `authenticated` e usa `SECURITY DEFINER`. A função verifica o papel e a instituição declarada, mas a revisão identificou que `p_criado_por` é recebido do cliente e gravado no documento sem exigir igualdade a `auth.uid()`; também não foi encontrada validação explícita de que `p_aluno_id`, quando fornecido, pertence à instituição. Requer correção/testes antes de produção.
+- `public.nova_vincular_documento_cobranca(...)` é executável por `authenticated` e usa `SECURITY DEFINER`. Confirma a mesma instituição e o papel, mas não confirma explicitamente que o tipo real do documento fiscal corresponde a `p_tipo` (fatura/recibo). Requer validação do tipo e testes de associação indevida.
+- `public.nova_registar_pagamento(...)` verifica o papel/instituição, valor positivo e impede que a soma ultrapasse o total. Ainda falta teste concorrente de pagamentos simultâneos, idempotência/repetição e ligação correta ao documento fiscal/recibo.
+- `public.contabilizar_documento_fiscal(uuid)` não tem EXECUTE direto concedido a `anon` ou `authenticated` na verificação atual. Contudo, a lógica permite estado `anulado` na validação de elegibilidade e depois pode gerar lançamento para um documento anulado; a regra deve ser revista e testada. A consulta não demonstrou que exista atualmente um caminho exposto para invocação por utilizadores normais.
+- As políticas de `cobrancas_escolares` e `pagamentos_escolares` contêm políticas permissivas sobrepostas. Como políticas permissivas se combinam por OR, validar a matriz de papéis é essencial para evitar que uma política mais ampla neutralize a intenção de outra.
+
+### Prioridade sugerida
+1. **Crítica antes de produção:** validar `p_criado_por`, pertença de aluno à instituição e tipo de documento na ligação cobrança/documento.
+2. **Alta:** validar contabilização de documentos anulados, pagamentos concorrentes/repetidos e privilégios de todas as funções SECURITY DEFINER.
+3. **Alta:** documentar os GRANTs e a intenção de acesso nas seis tabelas RLS sem políticas.
+4. **Média:** analisar políticas permissivas sobrepostas e inventário das 120 FKs sem índice, medindo desempenho antes de alterações.
+
+Nenhuma função SQL, política RLS, GRANT, dado ou Edge Function ativa foi alterada nesta segunda ronda. As correções são propostas até existir ambiente de homologação isolado, testes e aprovação de publicação.
+
 ## Plano de trabalho seguro
 1. Manter esta fase em leitura apenas; não alterar produção nem RLS.
 2. Recolher a definição integral das funções sinalizadas, todas as políticas das tabelas afetadas e os grants relevantes.
