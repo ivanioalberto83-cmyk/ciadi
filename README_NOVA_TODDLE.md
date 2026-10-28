@@ -36,3 +36,13 @@ Este código NÃO reutiliza a arquitetura clínica do CIADI. O repositório GitH
 4. Integrar a chamada real à Edge Function `nova-ai`.
 5. Criar migrations/configuração Supabase no repositório para sincronização GitHub.
 6. Testar Auth, RLS e fluxos de cada perfil.
+
+## Licenciamento e controlo de pagamentos (em preparação)
+- Migration aditiva: `supabase/migrations/20261028140000_license_installation_control.sql`.
+- Edge Function: `supabase/functions/license-control/index.ts` (JWT obrigatório).
+- Regista instalações por instituição, limita instalações ativas por assinatura e permite revogação pelo Super Admin.
+- O estado da licença é validado no servidor; a chave de instalação do browser não é prova de pagamento.
+- A confirmação de pagamento é manual e exclusiva do Super Admin, exige valor integral da fatura e referência do comprovativo, e regista auditoria.
+- O estado `active` só deve ser atribuído depois de confirmação real do recebimento. A data de fim da assinatura deve ser validada/atualizada separadamente; confirmar uma fatura não inventa um novo período.
+- A migração e a função ainda precisam de ser aplicadas/publicadas no projeto Supabase NOVA TODDLE. Não foram alterados dados de produção nem políticas existentes nesta etapa.
+- Antes de ativar a fiscalização obrigatória, fazer backup e teste de restauro, validar RLS e testar trial, pagamento pendente, pagamento confirmado, expiração, limite de instalações, revogação e isolamento entre instituições.
