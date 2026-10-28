@@ -13,6 +13,7 @@ A análise foi feita em modo de leitura no Supabase. Não foram aplicadas migra�
 - O RH atual tem cadastro, férias e documentos, mas não há tabelas de folha salarial nem regras IRT/INSS versionadas na base de dados.
 - Compras tem fornecedores e cabeçalho de pedidos, mas não existe tabela de linhas de pedido/receção identificada no esquema atual; o fluxo completo de aprovisionamento precisa de migração própria.
 - A função fiscal existente `fiscal_emitir_documento` emite no sistema e gera hash, mas isso não demonstra por si só submissão ou aceitação pela AGT.
+- **Bloqueio crítico:** a proteção de emissão implementada nesta branch é apenas da interface. A RPC existente continua disponível na base de dados para os papéis autorizados e ainda não verifica no servidor uma tabela de regras fiscais oficiais validadas nem o estado de autorização AGT da série. Portanto, não deve ser usada para emissão de produção até existir uma migração de endurecimento server-side testada.
 - Existe a função `contabilizar_documento_fiscal`, que cria lançamentos e verifica o equilíbrio, dependendo da configuração contabilística da instituição.
 - A consulta de configuração encontrou uma série fiscal de tipo `fatura` em estado `homologacao`, sem código AGT e com quantidade autorizada igual a zero. Por isso, o ecrã bloqueia a emissão em vez de assumir que a série está autorizada.
 - O teste do instalador falhava por uma expressão regular mal escapada em `tests/build-smoke.test.js`, impedindo a execução dos testes seguintes.
