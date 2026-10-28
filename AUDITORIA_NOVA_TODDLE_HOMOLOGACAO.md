@@ -106,3 +106,21 @@ Foi colocado em `audit/proposed-migrations/20261028_hardening_fiscal_emitir_docu
 
 ## Critério de saída
 Cada item só pode ser marcado como concluído quando houver evidência reproduzível, resultado do teste e revisão. Nenhuma alteração de produção ou publicação está autorizada por este documento.
+
+
+## Fase 6 — Cibersegurança (adicionada em 28-10-2026)
+
+A leitura dos advisors de segurança do Supabase identificou:
+- 6 tabelas com RLS ativo sem políticas: acompanhamentos_rede_educacao, contratos_profissionais_nova, documentos_candidatura_profissional, historico_verificacao_profissional, pagamentos_rede_educacao e propostas_apoio_educacional. Isto pode ser intencional como bloqueio total; confirmar o comportamento pretendido antes de qualquer alteração.
+- 5 funções SECURITY DEFINER executáveis por authenticated foram sinalizadas: fiscal_emitir_documento, nova_atualizar_estado_cobranca, nova_criar_cobranca, nova_registar_pagamento e nova_vincular_documento_cobranca. Rever autorização interna, search_path, validação de instituição, idempotência e privilégio mínimo antes de decidir revogar EXECUTE ou mudar o modo de segurança.
+- Proteção de Auth contra palavras-passe comprometidas está desativada.
+- Mantêm-se os riscos críticos já registados de isolamento entre instituições e de gestão de papéis/perfis.
+
+**Estado:** observações obtidas em modo de leitura. Nenhuma política, função, configuração de Auth ou segredo foi alterado. As tabelas sem políticas não devem receber políticas automaticamente sem uma matriz de permissões e testes. O relatório de findings e a validação em ambiente isolado são bloqueantes.
+
+## Fase 7 — Backups e recuperação de desastre (planeada; ainda não implementada)
+
+Foi criado um plano separado em `docs/plans/2026-10-28-ciberseguranca-backups-nova-toddle.md`. Inclui inventário Postgres/Storage, cópia externa cifrada, manifesto SHA-256, alertas de falha, retenção segura e restauro em ambiente isolado.
+
+**Limitações atuais:** não foi executado backup novo, não foi testado restauro, e não foi alterada qualquer configuração de produção. O backup de Postgres não deve ser tratado como cópia dos objetos Storage. A frequência diária e retenção inicial de 30 dias são propostas para aprovação, não configurações ativas. RPO/RTO, destino externo, custo e gestão de chaves permanecem por decidir.
+
