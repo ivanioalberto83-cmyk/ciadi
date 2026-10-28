@@ -9,10 +9,10 @@ Estado: auditoria em curso. Este documento é um registo de trabalho; não certi
 - Não colocar chaves secretas, tokens, palavras-passe ou dados pessoais neste repositório.
 
 ## Fase 1 — Autenticação e isolamento
-- [ ] Implementar e testar recuperação de palavra-passe, incluindo destino de retorno permitido.
+- [x] Adicionar pedido de recuperação de palavra-passe no login, com resposta genérica para reduzir enumeração de contas e retorno limitado à origem/caminho atuais; [ ] confirmar allowlist de Redirect URLs no Supabase e testar entrega do email.
 - [ ] Confirmar a atribuição segura de perfis; impedir autoelevação para super_admin.
 - [ ] Testar isolamento entre duas instituições com contas de papéis distintos.
-- [ ] Rever as funções SECURITY DEFINER e o EXECUTE concedido a authenticated; só ajustar após verificar os consumidores e a matriz de permissões.
+- [ ] Rever as funções SECURITY DEFINER e o EXECUTE concedido a authenticated; só ajustar após verificar os consumidores e a matriz de permissões. Achado para revisão: `fiscal_emitir_documento` aceita `p_criado_por` como argumento e grava esse valor; confirmar se pode permitir falsificação de autoria antes de propor correção.
 - [ ] Rever tabelas com RLS ativo sem políticas e definir se o bloqueio é intencional ou se faltam políticas.
 - [ ] Ativar proteção contra palavras-passe comprometidas após validar impacto e configuração de Auth.
 
@@ -41,6 +41,8 @@ Estado: auditoria em curso. Este documento é um registo de trabalho; não certi
 - [ ] Só distribuir após revisão do relatório e autorização expressa.
 
 ## Evidência disponível nesta revisão
+- O código foi atualizado apenas na branch isolada para adicionar o pedido de recuperação; nenhuma alteração foi aplicada ao Supabase.
+- 21 verificações estáticas executadas sobre os ficheiros da branch passaram localmente via inspeção automatizada; a execução completa do workflow Windows ainda está pendente.
 - A aplicação Electron declara contextIsolation, nodeIntegration desativado e sandbox ativo.
 - A inicialização web carrega Supabase JS de dois CDNs e apresenta erro se ambos falharem; isto continua dependente de rede.
 - O teste smoke original usava uma expressão regular frágil que não refletia a estrutura real do timeout.
