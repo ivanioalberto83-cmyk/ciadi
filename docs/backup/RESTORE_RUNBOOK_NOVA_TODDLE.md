@@ -21,6 +21,25 @@
 - Exportação de Storage e lista de objetos/tamanhos.
 - Plano para eliminar os dados de teste ao terminar, sujeito a aprovação.
 
+## Automatização disponível no repositório
+
+Foi adicionado o script `scripts/backup/restore-nova-toddle.ps1`. É um executor controlado de restauro PostgreSQL, não um serviço autónomo de recuperação: exige um ficheiro de backup já obtido, hash SHA-256 esperado, ferramentas PostgreSQL e destino de homologação explicitamente autorizado.
+
+Variáveis de ambiente necessárias, definidas apenas no ambiente seguro:
+- `NOVA_TODDLE_HOMOLOGATION_DATABASE_URL`: URI de ligação à base de homologação.
+- `NOVA_TODDLE_HOMOLOGATION_ALLOWED_HOSTS`: lista separada por vírgulas de hosts aprovados para homologação.
+
+Exemplo de simulação, sem escrever na base de dados:
+
+```powershell
+$env:NOVA_TODDLE_HOMOLOGATION_DATABASE_URL = '<URI segura de homologação>'
+$env:NOVA_TODDLE_HOMOLOGATION_ALLOWED_HOSTS = '<host exato de homologação>'
+$sha = (Get-FileHash '.\\backup.dump' -Algorithm SHA256).Hash
+.\\scripts\\backup\\restore-nova-toddle.ps1 -Environment Homologacao -BackupPath '.\\backup.dump' -ExpectedSha256 $sha -ConfirmRestore -WhatIf
+```
+
+Para executar sem `-WhatIf`, exige-se revisão do destino, aprovação operacional e confirmação de que a base é descartável e está isolada. O script não faz download automático, não recupera Storage e não certifica a aplicação após o restauro.
+
 ## Procedimento controlado
 
 1. **Confirmar alvo:** verificar o identificador do projeto de homologação por dois meios independentes. Parar se qualquer valor apontar para produção.
