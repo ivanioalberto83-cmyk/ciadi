@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - nova-toddle-escolar
+      - feat/nova-toddle-finance-rh-agt-20261028
 
 permissions:
   contents: read
