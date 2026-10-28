@@ -160,3 +160,12 @@ Esta revalidação foi feita através de consultas SQL de leitura ao projeto NOV
 - [ ] Preparar testes negativos e positivos numa base de homologação isolada e recolher evidências antes de propor aplicação.
 
 **Estado após esta revisão:** a Fase 1 confirma riscos prioritários, mas não está concluída. Nenhuma correção foi aplicada ao projeto Supabase. A publicação permanece bloqueada até haver remediações revistas, testes aprovados e autorização explícita.
+
+
+## Regra de arquitetura confirmada pelo responsável do produto — multiempresa autónoma
+
+Foi esclarecido que a NOVA TODDLE deve suportar várias empresas/instituições, cada uma autónoma e sem mistura de organizações. A regra foi documentada em `docs/security/MODELO_MULTIEMPRESA_ISOLAMENTO_NOVA_TODDLE.md`.
+
+A especificação exige isolamento consistente em base de dados/RLS, funções RPC, Edge Functions, Storage, autenticação e papéis, faturação, relatórios/exportações, IA, notificações e backups/restauros. Não existe partilha entre organizações por defeito. O administrador institucional fica limitado à sua organização; o papel global de plataforma deve ser separado, restrito e auditável.
+
+**Impacto no plano:** a prioridade é rever todas as políticas permissivas em conjunto, proteger `role` e `instituicao_id`, validar relações entre registos e criar testes A/B com duas instituições fictícias. A documentação foi atualizada na branch de auditoria. Nenhuma alteração de aplicação, esquema, política, função ou configuração de produção foi feita.
