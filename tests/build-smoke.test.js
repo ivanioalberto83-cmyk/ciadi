@@ -1,5 +1,6 @@
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
+const vm = require("node:vm");
 
 const pkg = require("../package.json");
 assert.equal(pkg.name, "nova-toddle-escolar-desktop");
@@ -13,6 +14,21 @@ assert.match(html, /loadSupabaseClient/);
 assert.match(html, /setTimeout\(function\(\)\{s\.remove\(\);next\(\);\},8000\)/);
 assert.match(html, /Supabase JS não pôde ser carregado/);
 assert.doesNotMatch(html, /throw new Error\("Supabase JS indisponível"\)/);
+assert.match(html, /LICENSE_ENFORCEMENT_ENABLED=false/);
+assert.match(html, /license-control/);
+assert.match(html, /Licenças e instalações/);
+assert.match(html, /Confirmar pagamento verificado/);
+for (const match of html.matchAll(/<script(?:\\s[^>]*)?>([\\s\\S]*?)<\\/script>/gi)) {
+  new vm.Script(match[1], { filename: "index-inline-script.js" });
+}
+const licenseMigration = fs.readFileSync("supabase/migrations/20261028140000_license_installation_control.sql", "utf8");
+assert.match(licenseMigration, /plataforma_instalacoes/);
+assert.match(licenseMigration, /ENABLE ROW LEVEL SECURITY/);
+const licenseFunction = fs.readFileSync("supabase/functions/license-control/index.ts", "utf8");
+assert.match(licenseFunction, /confirm_payment/);
+assert.match(licenseFunction, /profile.role !== "super_admin"/);
+assert.match(licenseFunction, /plataforma_licenca_eventos/);
+
 
 const workflow = fs.readFileSync(".github/workflows/build-nova-toddle-windows.yml", "utf8");
 assert.match(workflow, /nova-toddle-escolar-windows-installer/);
